@@ -10,8 +10,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "chalk": "^5.4.1",
+    "has-flag": "^5.0.1",
     "react": "18.3.1",
-    "react-native": "0.77.0"
+    "react-native": "0.77.0",
+    "supports-color": "^10.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
