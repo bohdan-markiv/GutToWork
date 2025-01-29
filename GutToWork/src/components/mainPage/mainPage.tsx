@@ -7,7 +7,7 @@ const ExampleComponent: React.FC = (): JSX.Element => {
         <View style={styles.container}>
             <Text style={styles.title}>GutToWork</Text>
             <Text style={styles.description}>
-                GutToWork is a project designed to revolutionize workplace well-being through technology and research.
+                Gut2Work is a project designed to revolutionize workplace well-being through technology and research.
             </Text>
         </View>
     );
