@@ -10,6 +10,22 @@ x-amazon-apigateway-request-validators:
     validateRequestBody: true
     validateRequestParameters: false
 x-amazon-apigateway-request-validator: all
+# Global CORS configuration
+x-amazon-apigateway-cors:
+  allowOrigins:
+    - "*"
+  allowHeaders:
+    - Content-Type
+    - X-Amz-Date
+    - Authorization
+    - X-Api-Key
+    - X-Amz-Security-Token
+  allowMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
 paths:
   /cars:
     get:
