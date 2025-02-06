@@ -17,16 +17,55 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 20,
         textAlign: 'center',
     },
     description: {
         fontSize: 16,
-        color: '#333',
+        marginBottom: 30,
         textAlign: 'center',
-        lineHeight: 22,
+    },
+    modalContainer: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#f2f2f2',
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: '600',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    modalContent: {
+        paddingBottom: 20,
+    },
+    carItem: {
+        backgroundColor: '#fff',
+        padding: 15,
+        marginVertical: 8,
+        borderRadius: 8,
+        elevation: 2, // for Android shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    carText: {
+        fontSize: 16,
+    },
+    closeButton: {
+        backgroundColor: '#007BFF',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 8,
+        alignSelf: 'center',
+        marginTop: 15,
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 16,
     },
 });
 
