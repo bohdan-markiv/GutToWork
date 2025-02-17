@@ -1,0 +1,152 @@
+openapi: 3.0.0
+info:
+  title: GutToWorkCDK
+  version: 1.0.0
+x-amazon-apigateway-request-validators:
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+  body-only:
+    validateRequestBody: true
+    validateRequestParameters: false
+x-amazon-apigateway-request-validator: all
+# Global CORS configuration
+x-amazon-apigateway-cors:
+  allowOrigins:
+    - "*"
+  allowHeaders:
+    - Content-Type
+    - X-Amz-Date
+    - Authorization
+    - X-Api-Key
+    - X-Amz-Security-Token
+  allowMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+paths:
+  /ingredients:
+    get:
+      tags:
+        - Ingredients
+      summary: List all ingredients
+      description: List ingredients
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredients"
+        "405":
+          description: Invalid input
+        "404":
+          description: No ingredients found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredients-get/invocations
+    post:
+      x-amazon-apigateway-request-validator: body-only
+      tags:
+        - Ingredients
+      summary: Register a new ingredient
+      description: Register a new ingredient
+      requestBody:
+        description: Create a new ingredient
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Ingredient"
+        required: false
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredients-post/invocations
+  /ingredients/{ingredient_id}:
+    get:
+      tags:
+        - Ingredients
+      summary: List a single ingredient
+      description: Get details of an ingredient
+      parameters:
+        - name: ingredient_id
+          in: path
+          description: ingredient_id of the car to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredient"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-get/invocations
+
+
+components:
+  schemas:
+    Ingredient:
+      type: object
+      required:
+        - name
+        - default_portion_size
+      properties:
+        name:
+          type: string
+          example: potato
+        default_portion_size:
+          type: string
+          example: small
+        default_cooking_type:
+          type: string
+          example: boiled
+    Ingredients:
+      type: array
+      items:
+        allOf:
+        - $ref: "#/components/schemas/Ingredient"
+    Cars:
+      type: array
+      items:
+        allOf:
+          - $ref: "#/components/schemas/Car"
+          - $ref: "#/components/schemas/Registration"
+    Car:
+      type: object
+      required:
+        - brand
+        - model
+      properties:
+        brand:
+          type: string
+          example: BMW
+        model:
+          type: string
+          example: x7
+        color:
+          type: string
+    Registration:
+      type: object
+      properties:
+        registrationId:
+          type: integer
+          format: int64
+          example: 10
+        registrationDate:
+          type: string
+          format: date-time

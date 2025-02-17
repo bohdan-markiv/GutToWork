@@ -17,13 +17,29 @@ export class GutToWork extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    // Create the ingredients table
+    const ingredients_table = new dynamodb.Table(this, 'ingredients-table', {
+      partitionKey: { name: 'ingredients-id', type: dynamodb.AttributeType.STRING },
+      tableName: 'ingredients',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
     // Import OpenAPI specification from file
-    const openApiSpec = apigateway.AssetApiDefinition.fromAsset('./services/api.yaml');
+    const openApiSpecCars = apigateway.AssetApiDefinition.fromAsset('./services/dev/api.yaml');
 
     // Create a SpecRestApi using the OpenAPI specification
-    const api = new apigateway.SpecRestApi(this, 'cars-cdk-api', {
-      apiDefinition: openApiSpec,
+    const apiCars = new apigateway.SpecRestApi(this, 'cars-cdk-api', {
+      apiDefinition: openApiSpecCars,
     });
+
+    // Import OpenAPI specification from file
+    const openApiSpecProd = apigateway.AssetApiDefinition.fromAsset('./services/prod/api.yaml');
+
+    // Create a SpecRestApi using the OpenAPI specification
+    const apiProd = new apigateway.SpecRestApi(this, 'guttowork-api', {
+      apiDefinition: openApiSpecProd,
+    });
+
 
     // -------------------------------
     // Define Lambda functions (Python)
@@ -34,7 +50,7 @@ export class GutToWork extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'cars-get',
       handler: 'get.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/lambdas/cars-get`)),
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-get`)),
       environment: {
         'DYNAMO_TABLE_NAME': table.tableName,
       },
@@ -42,12 +58,27 @@ export class GutToWork extends cdk.Stack {
     carsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(carsGetLambda);
 
+
+    // ingredients-get
+    const ingredientsGetLambda = new lambda.Function(this, 'ingredients-get', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'ingredients-get',
+      handler: 'get.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/ingredients`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': ingredients_table.tableName,
+      },
+    });
+    ingredientsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    ingredients_table.grantReadWriteData(ingredientsGetLambda);
+
+
     // cars-post-bohdan2
     const carsPostLambda = new lambda.Function(this, 'cars-post', {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'cars-post',
       handler: 'post.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/lambdas/cars-post`)),
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-post`)),
       environment: {
         'DYNAMO_TABLE_NAME': table.tableName,
       },
@@ -55,12 +86,25 @@ export class GutToWork extends cdk.Stack {
     carsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(carsPostLambda);
 
+    //ingredients-post-
+    const ingredientsPostLambda = new lambda.Function(this, 'ingredients-post', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'ingredients-post',
+      handler: 'post.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/ingredients`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': ingredients_table.tableName,
+      },
+    });
+    ingredientsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    ingredients_table.grantReadWriteData(ingredientsPostLambda);
+
     // cars-licenseplate-get
     const licensePlateGetLambda = new lambda.Function(this, 'cars-licenseplate-get', {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'cars-licenseplate-get',
       handler: 'get.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/lambdas/cars-licenseplate-get`)),
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-get`)),
       environment: {
         'DYNAMO_TABLE_NAME': table.tableName,
       },
@@ -68,12 +112,25 @@ export class GutToWork extends cdk.Stack {
     licensePlateGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(licensePlateGetLambda);
 
+    // IngredientId-get
+    const ingredientIdGetLambda = new lambda.Function(this, 'ingredient-id-get', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'ingredient-id-get',
+      handler: 'get.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/ingredients/{ingredient_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': ingredients_table.tableName,
+      },
+    });
+    ingredientIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    ingredients_table.grantReadWriteData(ingredientIdGetLambda);
+
     // cars-licenseplate-put-bohdan2
     const licensePlatePutLambda = new lambda.Function(this, 'cars-licenseplate-put', {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'cars-licenseplate-put',
       handler: 'put.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/lambdas/cars-licenseplate-put`)),
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-put`)),
       environment: {
         'DYNAMO_TABLE_NAME': table.tableName,
       },
@@ -86,7 +143,7 @@ export class GutToWork extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'cars-licenseplate-delete',
       handler: 'delete.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/lambdas/cars-licenseplate-delete`)),
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-delete`)),
       environment: {
         'DYNAMO_TABLE_NAME': table.tableName,
       },
@@ -98,7 +155,15 @@ export class GutToWork extends cdk.Stack {
     // Output the API Gateway endpoint URL
     // -------------------------------
     new cdk.CfnOutput(this, 'ApiEndpoint', {
-      value: `https://${api.restApiId}.execute-api.${this.region}.amazonaws.com/`,
+      value: `https://${apiCars.restApiId}.execute-api.${this.region}.amazonaws.com/`,
+      description: 'The URL of the API Gateway endpoint',
+    });
+
+       // -------------------------------
+    // Output the API Gateway endpoint URL
+    // -------------------------------
+    new cdk.CfnOutput(this, 'ApiProdEndpoint', {
+      value: `https://${apiProd.restApiId}.execute-api.${this.region}.amazonaws.com/`,
       description: 'The URL of the API Gateway endpoint',
     });
   }
