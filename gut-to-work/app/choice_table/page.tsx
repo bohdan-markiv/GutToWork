@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button } from "../components/Button";
 
 export default function DashboardPage() {
-    const router = useRouter();
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white text-blue-300">
@@ -13,8 +11,7 @@ export default function DashboardPage() {
                 This project is designed to help you analyze your diet and find out why exactly your mood is not always the best.
             </p>
             <Button
-                className="hover:!bg-gray-500"
-                onClick={() => router.back()} // This makes the button go back
+                className="hover:!bg-gray-500" // This makes the button go back
             >
                 Go Back
             </Button>
