@@ -1,7 +1,10 @@
+// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "export",      // Enables static export mode
+  trailingSlash: true,   // Optional: ensures trailing slash in URLs
+  // ...other configuration options if needed
 };
 
 export default nextConfig;
