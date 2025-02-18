@@ -96,6 +96,58 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-get/invocations
+    put:
+      x-amazon-apigateway-request-validator: body-only
+      tags:
+        - Ingredients
+      summary: Update an ingredient
+      description: Update an ingredient
+      requestBody:
+        description: Update an ingredient
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Ingredient"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredient"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-put/invocations
+    delete:
+      tags:
+        - Ingredients
+      summary: Delete an ingredient
+      description: Delete an ingredient
+      parameters:
+        - name: ingredient_id
+          in: path
+          description: ingredientID of the ingredient to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredient"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-delete/invocations
 
 
 components:
@@ -103,10 +155,10 @@ components:
     Ingredient:
       type: object
       required:
-        - name
+        - ingredient_name
         - default_portion_size
       properties:
-        name:
+        ingredient_name:
           type: string
           example: potato
         default_portion_size:

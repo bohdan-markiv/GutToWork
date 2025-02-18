@@ -18,8 +18,8 @@ def handler(event, context):
                               "ingredients-id": {
                                   "S": ingredient_id
                               },
-                              "name": {
-                                  "S": event_body["name"]
+                              "ingredient_name": {
+                                  "S": event_body["ingredient_name"]
                               },
                               "default_portion_size": {
                                   "S": event_body["default_portion_size"]

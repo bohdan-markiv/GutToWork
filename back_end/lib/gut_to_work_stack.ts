@@ -138,6 +138,33 @@ export class GutToWork extends cdk.Stack {
     licensePlatePutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(licensePlatePutLambda);
 
+    // ingredientId-put
+    const ingredientIdPutLambda = new lambda.Function(this, 'ingredient-id-put', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'ingredient-id-put',
+      handler: 'put.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/ingredients/{ingredient_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': ingredients_table.tableName,
+      },
+    });
+    ingredientIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    ingredients_table.grantReadWriteData(ingredientIdPutLambda);
+
+    // ingredientId-delete
+    const ingredientIdDeleteLambda = new lambda.Function(this, 'ingredient-id-delete', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'ingredient-id-delete',
+      handler: 'delete.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/ingredients/{ingredient_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': ingredients_table.tableName,
+      },
+    });
+    ingredientIdDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    ingredients_table.grantReadWriteData(ingredientIdDeleteLambda);
+
+    
     // cars-licenseplate-delete-bohdan2
     const licensePlateDeleteLambda = new lambda.Function(this, 'cars-licenseplate-delete', {
       runtime: lambda.Runtime.PYTHON_3_12,
