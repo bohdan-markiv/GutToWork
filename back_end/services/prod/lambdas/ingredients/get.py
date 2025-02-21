@@ -7,6 +7,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+def parse_dynamo_data(data):
+    return [{k: v["S"] for k, v in item.items()} for item in data]
+
+
 def handler(event, context):
     # Create a DynamoDB resource
     try:
@@ -29,7 +33,7 @@ def handler(event, context):
     try:
         logger.info(response)
         items = response.get('Items', [])
-
+        parsed_items = parse_dynamo_data(items)
     except Exception as e:
         logger.error(f"error - {e}", exc_info=True)
         return {
@@ -56,5 +60,5 @@ def handler(event, context):
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         },
-        'body': json.dumps(items)
+        'body': json.dumps(parsed_items)
     }

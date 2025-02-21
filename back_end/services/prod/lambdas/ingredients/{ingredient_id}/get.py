@@ -6,6 +6,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+def parse_dynamo_data(data):
+    return [{k: v["S"] for k, v in item.items()} for item in data]
+
+
 def handler(event, context):
     logger.info(event)
 
@@ -23,6 +27,8 @@ def handler(event, context):
         )
 
         item = response.get('Item')
+
+        parsed_item = parse_dynamo_data([item])[0]
         if not item:
             return {
                 'statusCode': 404,
@@ -39,7 +45,7 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps(item)
+            'body': json.dumps(parsed_item)
         }
 
     except Exception as e:
