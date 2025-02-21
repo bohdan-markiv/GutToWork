@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "../components/Button";
+import axios from 'axios';
 import {
     Table,
     TableBody,
@@ -9,8 +10,28 @@ import {
     TableHeader,
     TableRow,
 } from "../components/Table";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
+
+    const [ingredients, setIngredients] = useState<any[]>([]);
+
+    useEffect(() => {
+        // Wrap your axios call in an async function
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(
+                    "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients"
+                );
+                setIngredients(response.data);
+            } catch (error) {
+                console.error("Failed to fetch ingredients", error);
+            }
+        };
+
+        fetchData();
+        // Don’t forget to call the async function inside the effect
+    }, []);
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white text-blue-300">
@@ -39,5 +60,6 @@ export default function DashboardPage() {
                 Go Back
             </Button>
         </div>
+
     );
 }
