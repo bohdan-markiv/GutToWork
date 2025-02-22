@@ -46,6 +46,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function DashboardPage() {
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+    const [open, setOpen] = useState(false);
 
     // ----- Fetch Ingredients -----
     useEffect(() => {
@@ -83,8 +84,16 @@ export default function DashboardPage() {
                     default_portion_size: data.default_size,
                 }
             );
-            const newIngredient: Ingredient = response.data;
+            const newIngredient: Ingredient = {
+                ingredient_name: data.ingredient_name,
+                default_cooking_type: data.default_cooking_type,
+                "ingredients-id": response.data,
+                default_portion_size: data.default_size,
+            };
+            console.log(newIngredient);
             setIngredients((prev) => [...prev, newIngredient]);
+            form.reset(); // clear the form
+            setOpen(false); // close the dialog
         } catch (error) {
             console.error("Failed to create ingredient", error);
         }
@@ -117,8 +126,8 @@ export default function DashboardPage() {
             </Table>
 
             {/* ----- AlertDialog with Form ----- */}
-            <AlertDialog>
-                <AlertDialogTrigger>
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogTrigger asChild>
                     <Button className="mt-4 hover:!bg-gray-500">Create Ingredient</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
