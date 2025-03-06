@@ -163,9 +163,11 @@ components:
           example: potato
         default_portion_size:
           type: string
+          enum: [big, normal, small]
           example: small
         default_cooking_type:
           type: string
+          enum: [raw, boiled, deep fried, pan fried, baked, infused]
           example: boiled
     Ingredients:
       type: array
