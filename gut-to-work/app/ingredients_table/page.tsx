@@ -100,7 +100,10 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white text-blue-300">
+        <div className="min-h-screen flex flex-col items-center justify-center p-8"   style={{
+            backgroundColor: 'white',
+            color: 'blue',
+          }}>
             <h1 className="text-4xl font-bold mb-4">Welcome to Dashboard</h1>
 
             {/* ----- Ingredients Table ----- */}
