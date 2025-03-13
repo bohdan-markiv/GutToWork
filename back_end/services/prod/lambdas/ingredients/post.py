@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)
 
 
 def normalize_name(name):
-    """Normalize the ingredient name by removing spaces, hyphens, and underscores."""
+    """Normalize the ingredient name by removing spaces, hyphens, and underscores to avoid duplicates later"""
     return re.sub(r'[\s\-_]+', '',name)
 
 
@@ -20,7 +20,8 @@ def handler(event, context):
     event_body = json.loads(event['body'])
     logger.info(event)
 
-    ingredient_name = event_body["ingredient_name"].strip().lower()
+    #make new ingredient lowercase and normalize it to avoid duplicates
+    ingredient_name = event_body["ingredient_name"].strip().lower() 
     normalized_name = normalize_name(ingredient_name)
 
     try:
@@ -51,15 +52,14 @@ def handler(event, context):
     dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
     # Check if the ingredient_name already exists in the table
-    # Fetch all existing ingredients
     try:
-        response = dynamodb.scan(TableName='ingredients')
+        response = dynamodb.scan(TableName='ingredients')     # Fetch all existing ingredients
 
-        for item in response.get('Items', []):
-            existing_name = item.get("ingredient_name", {}).get("S", "").strip().lower()
+        for item in response.get('Items', []): #normalize existing names
+            existing_name = item.get("ingredient_name", {}).get("S", "").strip().lower() 
             existing_normalized = normalize_name(existing_name)
 
-            # **Exact Match Check**
+            # Exact Match Check
             if existing_normalized == normalized_name:
                 return {
                     'statusCode': 400,
@@ -70,7 +70,7 @@ def handler(event, context):
                     'body': f"Ingredient '{event_body['ingredient_name']}' is too similar to an existing entry '{existing_name}'"
                 }
 
-            # **Partial Match Check (begins_with & contains)**
+            # Partial Match Check 
             if existing_normalized.startswith(normalized_name) or normalized_name.startswith(existing_normalized):
                 return {
                     'statusCode': 400,

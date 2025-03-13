@@ -10,7 +10,7 @@ export class GutToWork extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Create the DynamoDB table
+    // Create the DynamoDB table for cars
     const table = new dynamodb.Table(this, 'cars-cdk-table', {
       partitionKey: { name: 'car-id', type: dynamodb.AttributeType.STRING },
       tableName: 'cars-cdk',
@@ -24,10 +24,10 @@ export class GutToWork extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // Import OpenAPI specification from file
+    // Import OpenAPI specification from file for cars
     const openApiSpecCars = apigateway.AssetApiDefinition.fromAsset('./services/dev/api.yaml');
 
-    // Create a SpecRestApi using the OpenAPI specification
+    // Create a SpecRestApi using the OpenAPI specification for cars
     const apiCars = new apigateway.SpecRestApi(this, 'cars-cdk-api', {
       apiDefinition: openApiSpecCars,
     });
@@ -86,7 +86,7 @@ export class GutToWork extends cdk.Stack {
     carsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(carsPostLambda);
 
-    //ingredients-post-
+    //ingredients-post
     const ingredientsPostLambda = new lambda.Function(this, 'ingredients-post', {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'ingredients-post',
@@ -112,7 +112,7 @@ export class GutToWork extends cdk.Stack {
     licensePlateGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(licensePlateGetLambda);
 
-    // IngredientId-get
+    // ingredientId-get
     const ingredientIdGetLambda = new lambda.Function(this, 'ingredient-id-get', {
       runtime: lambda.Runtime.PYTHON_3_12,
       functionName: 'ingredient-id-get',
@@ -151,6 +151,19 @@ export class GutToWork extends cdk.Stack {
     ingredientIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdPutLambda);
 
+    // cars-licenseplate-delete-bohdan2
+    const licensePlateDeleteLambda = new lambda.Function(this, 'cars-licenseplate-delete', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'cars-licenseplate-delete',
+      handler: 'delete.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-delete`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': table.tableName,
+      },
+    });
+    licensePlateDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    table.grantReadWriteData(licensePlateDeleteLambda);
+
     // ingredientId-delete
     const ingredientIdDeleteLambda = new lambda.Function(this, 'ingredient-id-delete', {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -165,21 +178,9 @@ export class GutToWork extends cdk.Stack {
     ingredients_table.grantReadWriteData(ingredientIdDeleteLambda);
 
     
-    // cars-licenseplate-delete-bohdan2
-    const licensePlateDeleteLambda = new lambda.Function(this, 'cars-licenseplate-delete', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-delete',
-      handler: 'delete.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-delete`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    licensePlateDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlateDeleteLambda);
 
     // -------------------------------
-    // Output the API Gateway endpoint URL
+    // Output the API Gateway endpoint URL for cars
     // -------------------------------
     new cdk.CfnOutput(this, 'ApiEndpoint', {
       value: `https://${apiCars.restApiId}.execute-api.${this.region}.amazonaws.com/`,
@@ -187,7 +188,7 @@ export class GutToWork extends cdk.Stack {
     });
 
        // -------------------------------
-    // Output the API Gateway endpoint URL
+    // Output the API Gateway endpoint URL for ingredients
     // -------------------------------
     new cdk.CfnOutput(this, 'ApiProdEndpoint', {
       value: `https://${apiProd.restApiId}.execute-api.${this.region}.amazonaws.com/`,

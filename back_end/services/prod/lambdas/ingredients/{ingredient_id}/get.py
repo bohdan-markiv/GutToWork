@@ -18,7 +18,7 @@ def handler(event, context):
     try:
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
-        # Use get_item instead of scan (requires 'car-id' is the partition key)
+        # Use get_item instead of scan (requires 'ingredient-id' as the partition key)
         response = dynamodb.get_item(
             TableName='ingredients',
             Key={

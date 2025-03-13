@@ -53,7 +53,7 @@ paths:
       tags:
         - Ingredients
       summary: Register a new ingredient
-      description: Register a new ingredient
+      description: Register a new ingredient after checking it doesn't already exist in the table
       requestBody:
         description: Create a new ingredient
         content:
@@ -110,7 +110,7 @@ paths:
       parameters:
         - name: ingredient_id
           in: path
-          description: ingredient_id of the car to return
+          description: ingredient_id of the ingredient to return
           required: true
           schema:
             type: string
