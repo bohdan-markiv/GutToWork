@@ -24,29 +24,6 @@ def handler(event, context):
     ingredient_name = event_body["ingredient_name"].strip().lower() 
     normalized_name = normalize_name(ingredient_name)
 
-    try:
-        item = {
-                              "ingredients-id": {
-                                  "S": ingredient_id
-                              },
-                              "ingredient_name": {
-                                  "S": ingredient_name
-                              },
-                              "default_portion_size": {
-                                  "S": event_body["default_portion_size"]
-                              }
-                          }
-        if "default_cooking_type" in event_body:
-            item["default_cooking_type"] = {"S": event_body["default_cooking_type"]}
-    except Exception as e:
-            return {
-                'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': f"Internal error occured - {e}"
-            }
 
     # Initialize DynamoDB client
     dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
@@ -90,7 +67,33 @@ def handler(event, context):
             'body': f"Error checking for duplicate ingredient name - {e}"
         }
 
-    # If no duplicate, insert the new item into DynamoDB
+    # If no duplicate, create new item and insert it into DynamoDB
+
+    try:
+        item = {
+                              "ingredients-id": {
+                                  "S": ingredient_id
+                              },
+                              "ingredient_name": {
+                                  "S": ingredient_name
+                              },
+                              "default_portion_size": {
+                                  "S": event_body["default_portion_size"]
+                              }
+                          }
+        if "default_cooking_type" in event_body:
+            item["default_cooking_type"] = {"S": event_body["default_cooking_type"]}
+    except Exception as e:
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': f"Internal error occured - {e}"
+            }
+
+    
     try:
         dynamodb.put_item(TableName='ingredients', Item=item)
     except Exception as e:
