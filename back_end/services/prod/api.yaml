@@ -234,33 +234,4 @@ components:
       items:
         allOf:
           - $ref: "#/components/schemas/Ingredient"
-    Cars:
-      type: array
-      items:
-        allOf:
-          - $ref: "#/components/schemas/Car"
-          - $ref: "#/components/schemas/Registration"
-    Car:
-      type: object
-      required:
-        - brand
-        - model
-      properties:
-        brand:
-          type: string
-          example: BMW
-        model:
-          type: string
-          example: x7
-        color:
-          type: string
-    Registration:
-      type: object
-      properties:
-        registrationId:
-          type: integer
-          format: int64
-          example: 10
-        registrationDate:
-          type: string
-          format: date-time
+    
