@@ -31,9 +31,7 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({
-                'message': f"Item with ingredientId '{ingredient_id}' was deleted successfully"
-            })
+            'body': json.dumps({'ingredient_id': ingredient_id})
         }
 
     except Exception as e:

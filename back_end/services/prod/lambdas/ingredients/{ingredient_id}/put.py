@@ -24,15 +24,15 @@ def handler(event, context):
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
         # Build the update expression dynamically
-        update_expressions = []
-        expression_values = {}
+        update_expressions = [
+            "ingredient_name = :n",
+            "default_portion_size = :m"
+        ]
+        expression_values = {
+            ":n": {'S': ingredient_name},
+            ":m": {'S': ingredient_def_portion}
+        }
 
-        if ingredient_name:
-            update_expressions.append("ingredient_name = :n")
-            expression_values[":n"] = {'S': ingredient_name}
-        if ingredient_def_portion:
-            update_expressions.append("default_portion_size = :m")
-            expression_values[":m"] = {'S': ingredient_def_portion}
         if ingredient_def_cook_type is not None:
             update_expressions.append("default_cooking_type = :l")
             expression_values[":l"] = {'S': ingredient_def_cook_type}
