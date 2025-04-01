@@ -27,6 +27,15 @@ import {
     FormMessage,
 } from "../components/Form";
 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "../components/DropdownMenu";
+
 import { Input } from "../components/Input";
 import {
     AlertDialog,
@@ -34,6 +43,7 @@ import {
     AlertDialogContent,
     AlertDialogCancel,
 } from "../components/AlertDialog";
+
 
 // ----- Zod Schema -----
 const formSchema = z.object({
@@ -99,6 +109,22 @@ export default function DashboardPage() {
         }
     };
 
+    // ----- Handle Ingredient Deletion -----
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await axios.delete(
+                `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${id}`
+            );
+    
+            console.log("Deleted ingredient:", response.data);
+    
+            // Update state to remove the ingredient
+            setIngredients((prev) => prev.filter((item) => item["ingredients-id"] !== id));
+        } catch (error) {
+            console.error("Failed to delete ingredient", error);
+        }
+    };
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8"   style={{
             backgroundColor: 'white',
@@ -113,6 +139,7 @@ export default function DashboardPage() {
                         <TableHead className="w-[100px]">Name</TableHead>
                         <TableHead>Default Cooking style</TableHead>
                         <TableHead>Default Size</TableHead>
+                        <TableHead className="w-[50px] text-center"></TableHead> {/* New column */}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -123,6 +150,14 @@ export default function DashboardPage() {
                             </TableCell>
                             <TableCell>{ingredient.default_cooking_type}</TableCell>
                             <TableCell>{ingredient.default_portion_size}</TableCell>
+                            <TableCell className="text-center">
+                                <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => handleDelete(ingredient["ingredients-id"])}>
+                                    Delete
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -162,7 +197,23 @@ export default function DashboardPage() {
                                     <FormItem>
                                         <FormLabel>Default Cooking Type</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., Boiled" {...field} />
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <div
+                                                        className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                                                    >
+                                                        {field.value || "Select Cooking Type"}
+                                                        </div>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuSeparator />
+                                                    {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
+                                                        <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                                                            {type}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </FormControl>
                                         <FormDescription>
                                             Enter the usual cooking method.
@@ -180,7 +231,23 @@ export default function DashboardPage() {
                                     <FormItem>
                                         <FormLabel>Default Size</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., Small" {...field} />
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <div
+                                                        className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                                                    >
+                                                        {field.value || "Select Portion Size"}
+                                                        </div>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuSeparator />
+                                                    {["small", "normal", "big"].map((type) => (
+                                                        <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                                                            {type}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </FormControl>
                                         <FormDescription>
                                             Enter the default portion size.
