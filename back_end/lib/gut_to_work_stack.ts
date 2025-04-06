@@ -157,6 +157,19 @@ export class GutToWork extends cdk.Stack {
     });
     ingredientIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdGetLambda);
+  
+    // poopID-get
+    const poopIdGetLambda = new lambda.Function(this, 'poop-id-get', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'poop-id-get',
+      handler: 'get.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/poop/{poop_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': poop_table.tableName,
+      },
+    });
+    poopIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    poop_table.grantReadWriteData(poopIdGetLambda);
 
     // cars-licenseplate-put-bohdan2
     const licensePlatePutLambda = new lambda.Function(this, 'cars-licenseplate-put', {
@@ -184,6 +197,20 @@ export class GutToWork extends cdk.Stack {
     ingredientIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdPutLambda);
 
+
+    // poopId-put
+    const poopIdPutLambda = new lambda.Function(this, 'poop-id-put', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'poop-id-put',
+      handler: 'put.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/poop/{poop_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': poop_table.tableName,
+      },
+    });
+    poopIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    poop_table.grantReadWriteData(poopIdPutLambda);
+
     // cars-licenseplate-delete-bohdan2
     const licensePlateDeleteLambda = new lambda.Function(this, 'cars-licenseplate-delete', {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -196,6 +223,19 @@ export class GutToWork extends cdk.Stack {
     });
     licensePlateDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     table.grantReadWriteData(licensePlateDeleteLambda);
+
+    // poopId-delete
+    const poopIdDeleteLambda = new lambda.Function(this, 'poop-id-delete', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'poop-id-delete',
+      handler: 'delete.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/poop/{poop_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': poop_table.tableName,
+      },
+    });
+    poopIdDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    poop_table.grantReadWriteData(poopIdDeleteLambda);
 
     // ingredientId-delete
     const ingredientIdDeleteLambda = new lambda.Function(this, 'ingredient-id-delete', {
@@ -210,7 +250,6 @@ export class GutToWork extends cdk.Stack {
     ingredientIdDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdDeleteLambda);
 
-    
 
     // -------------------------------
     // Output the API Gateway endpoint URL for cars
