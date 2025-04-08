@@ -423,14 +423,14 @@ components:
     FoodRecord:
       type: object
       required:
-        - date
+        - record_date
         - ingredient_id
         - ingredient_name
         - portion_size
         - cooking_type
         - time_of_day
       properties:
-          date:
+          record_date:
             type: string
             format: date
           ingredient_id:

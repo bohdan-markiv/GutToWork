@@ -22,8 +22,8 @@ def handler(event, context):
             "food-record-id": {
                 "S": food_record_id
             },
-            "date": {
-                "S": event_body["date"]
+            "record_date": {
+                "S": event_body["record_date"]
             },
             "ingredient_id": {
                 "S": event_body["ingredient_id"]

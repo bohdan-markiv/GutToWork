@@ -15,7 +15,7 @@ def handler(event, context):
 
         # Parse the request body (API Gateway sends it as a JSON string)
         body = json.loads(event["body"])
-        date = body.get("date")
+        inserted_date = body.get("record_date")
         ingredient_id = body.get("ingredient_id")
         ingredient_name = body.get("ingredient_name")
         portion_size = body.get("portion_size")
@@ -29,9 +29,9 @@ def handler(event, context):
         update_expressions = []
         expression_values = {}
 
-        if date:
-            update_expressions.append("date = :d")
-            expression_values[":d"] = {'S': date}
+        if inserted_date:
+            update_expressions.append("record_date = :d")
+            expression_values[":d"] = {'S': inserted_date}
 
         if ingredient_id:
             update_expressions.append("ingredient_id = :i")
