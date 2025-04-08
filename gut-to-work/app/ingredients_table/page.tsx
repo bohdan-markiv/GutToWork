@@ -6,6 +6,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Trash2 } from "lucide-react";
+
 import { Button } from "../components/Button";
 import {
     Table,
@@ -42,6 +44,11 @@ import {
     AlertDialogTrigger,
     AlertDialogContent,
     AlertDialogCancel,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogAction,
+    AlertDialogDescription,
 } from "../components/AlertDialog";
 
 
@@ -125,12 +132,39 @@ export default function DashboardPage() {
         }
     };
 
+    const handleEdit = async (id: string, data: FormData) => {
+        try {
+            const updatedData =  {
+                ingredient_name: data.ingredient_name,
+                default_cooking_type: data.default_cooking_type,
+                default_portion_size: data.default_size,
+            }
+            const response = await axios.put(
+                `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${id}`,
+                updatedData
+            );
+                    // Step 5: Update local state with new data
+            setIngredients(prev =>
+                prev.map(item =>
+                    item["ingredients-id"] === id
+                        ? { ...item, ...updatedData }
+                        : item
+                )
+            );
+
+        console.log("Ingredient updated successfully:", response.data);
+
+        } catch (error) {
+            console.error("Failed to edit ingredient", error);
+        }
+    };
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8"   style={{
             backgroundColor: 'white',
             color: 'blue',
           }}>
-            <h1 className="text-4xl font-bold mb-4">Welcome to Dashboard</h1>
+            <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
             {/* ----- Ingredients Table ----- */}
             <Table>
@@ -139,7 +173,8 @@ export default function DashboardPage() {
                         <TableHead className="w-[100px]">Name</TableHead>
                         <TableHead>Default Cooking style</TableHead>
                         <TableHead>Default Size</TableHead>
-                        <TableHead className="w-[50px] text-center"></TableHead> {/* New column */}
+                        <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
+                        <TableHead className="w-[50px] text-center"></TableHead> {/* Edit */}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -151,12 +186,25 @@ export default function DashboardPage() {
                             <TableCell>{ingredient.default_cooking_type}</TableCell>
                             <TableCell>{ingredient.default_portion_size}</TableCell>
                             <TableCell className="text-center">
-                                <Button 
-                                    variant="destructive" 
-                                    size="sm"
-                                    onClick={() => handleDelete(ingredient["ingredients-id"])}>
-                                    Delete
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger>
+                                        <Trash2 className="w-4 h-4" />
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. It will permanently delete this ingredient from our servers.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDelete(ingredient["ingredients-id"])}>
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </TableCell>
                         </TableRow>
                     ))}
