@@ -10,12 +10,7 @@ export class GutToWork extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Create the DynamoDB table for cars
-    const table = new dynamodb.Table(this, 'cars-cdk-table', {
-      partitionKey: { name: 'car-id', type: dynamodb.AttributeType.STRING },
-      tableName: 'cars-cdk',
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
+
 
     // Create the ingredients table
     const ingredients_table = new dynamodb.Table(this, 'ingredients-table', {
@@ -31,14 +26,7 @@ export class GutToWork extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
    
-    // Import OpenAPI specification from file for cars
-    const openApiSpecCars = apigateway.AssetApiDefinition.fromAsset('./services/dev/api.yaml');
-
-    // Create a SpecRestApi using the OpenAPI specification for cars
-    const apiCars = new apigateway.SpecRestApi(this, 'cars-cdk-api', {
-      apiDefinition: openApiSpecCars,
-    });
-
+    
     // Import OpenAPI specification from file
     const openApiSpecProd = apigateway.AssetApiDefinition.fromAsset('./services/prod/api.yaml');
 
@@ -51,19 +39,6 @@ export class GutToWork extends cdk.Stack {
     // -------------------------------
     // Define Lambda functions (Python)
     // -------------------------------
-
-    // cars-get-bohdan2
-    const carsGetLambda = new lambda.Function(this, 'cars-get', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-get',
-      handler: 'get.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-get`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    carsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(carsGetLambda);
 
 
     // ingredients-get
@@ -93,18 +68,6 @@ export class GutToWork extends cdk.Stack {
     poop_table.grantReadWriteData(poopGetLambda);
 
 
-    // cars-post-bohdan2
-    const carsPostLambda = new lambda.Function(this, 'cars-post', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-post',
-      handler: 'post.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-post`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    carsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(carsPostLambda);
 
     //ingredients-post
     const ingredientsPostLambda = new lambda.Function(this, 'ingredients-post', {
@@ -132,18 +95,6 @@ export class GutToWork extends cdk.Stack {
     poopPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     poop_table.grantReadWriteData(poopPostLambda);
 
-    // cars-licenseplate-get
-    const licensePlateGetLambda = new lambda.Function(this, 'cars-licenseplate-get', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-get',
-      handler: 'get.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-get`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    licensePlateGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlateGetLambda);
 
     // ingredientId-get
     const ingredientIdGetLambda = new lambda.Function(this, 'ingredient-id-get', {
@@ -171,18 +122,6 @@ export class GutToWork extends cdk.Stack {
     poopIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     poop_table.grantReadWriteData(poopIdGetLambda);
 
-    // cars-licenseplate-put-bohdan2
-    const licensePlatePutLambda = new lambda.Function(this, 'cars-licenseplate-put', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-put',
-      handler: 'put.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-put`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    licensePlatePutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlatePutLambda);
 
     // ingredientId-put
     const ingredientIdPutLambda = new lambda.Function(this, 'ingredient-id-put', {
@@ -211,19 +150,7 @@ export class GutToWork extends cdk.Stack {
     poopIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     poop_table.grantReadWriteData(poopIdPutLambda);
 
-    // cars-licenseplate-delete-bohdan2
-    const licensePlateDeleteLambda = new lambda.Function(this, 'cars-licenseplate-delete', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-delete',
-      handler: 'delete.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-delete`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    licensePlateDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlateDeleteLambda);
-
+ 
     // poopId-delete
     const poopIdDeleteLambda = new lambda.Function(this, 'poop-id-delete', {
       runtime: lambda.Runtime.PYTHON_3_12,
