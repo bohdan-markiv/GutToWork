@@ -23,6 +23,13 @@ export class GutToWork extends cdk.Stack {
       tableName: 'ingredients',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+   
+    // Create the feelings table
+    const feelings_table = new dynamodb.Table(this, 'feelings-table', {
+      partitionKey: { name: 'feeling-id', type: dynamodb.AttributeType.STRING },
+      tableName: 'feelings',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
 
     // Import OpenAPI specification from file for cars
     const openApiSpecCars = apigateway.AssetApiDefinition.fromAsset('./services/dev/api.yaml');
@@ -45,18 +52,6 @@ export class GutToWork extends cdk.Stack {
     // Define Lambda functions (Python)
     // -------------------------------
 
-    // cars-get-bohdan2
-    const carsGetLambda = new lambda.Function(this, 'cars-get', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-get',
-      handler: 'get.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-get`)),
-      environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
-      },
-    });
-    carsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(carsGetLambda);
 
 
     // ingredients-get
@@ -72,19 +67,19 @@ export class GutToWork extends cdk.Stack {
     ingredientsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientsGetLambda);
 
-
-    // cars-post-bohdan2
-    const carsPostLambda = new lambda.Function(this, 'cars-post', {
+    // feelings-get
+    const feelingsGetLambda = new lambda.Function(this, 'feelings-get', {
       runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-post',
-      handler: 'post.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-post`)),
+      functionName: 'feelings-get',
+      handler: 'get.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/feelings`)),
       environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
+        'DYNAMO_TABLE_NAME': feelings_table.tableName,
       },
     });
-    carsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(carsPostLambda);
+    feelingsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    feelings_table.grantReadWriteData(feelingsGetLambda);
+     
 
     //ingredients-post
     const ingredientsPostLambda = new lambda.Function(this, 'ingredients-post', {
@@ -99,18 +94,20 @@ export class GutToWork extends cdk.Stack {
     ingredientsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientsPostLambda);
 
-    // cars-licenseplate-get
-    const licensePlateGetLambda = new lambda.Function(this, 'cars-licenseplate-get', {
+    //feelings-post
+    const feelingsPostLambda = new lambda.Function(this, 'feelings-post', {
       runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-get',
-      handler: 'get.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-get`)),
+      functionName: 'feelings-post',
+      handler: 'post.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/feelings`)),
       environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
+        'DYNAMO_TABLE_NAME': feelings_table.tableName,
       },
     });
-    licensePlateGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlateGetLambda);
+    feelingsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    feelings_table.grantReadWriteData(feelingsPostLambda);
+
+  
 
     // ingredientId-get
     const ingredientIdGetLambda = new lambda.Function(this, 'ingredient-id-get', {
@@ -125,18 +122,19 @@ export class GutToWork extends cdk.Stack {
     ingredientIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdGetLambda);
 
-    // cars-licenseplate-put-bohdan2
-    const licensePlatePutLambda = new lambda.Function(this, 'cars-licenseplate-put', {
+
+    // feelingID-get
+    const feelingIdGetLambda = new lambda.Function(this, 'feeling-id-get', {
       runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-put',
-      handler: 'put.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-put`)),
+      functionName: 'feeling-id-get',
+      handler: 'get.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/feelings/{feeling_id}`)),
       environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
+        'DYNAMO_TABLE_NAME': feelings_table.tableName,
       },
     });
-    licensePlatePutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlatePutLambda);
+    feelingIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    feelings_table.grantReadWriteData(feelingIdGetLambda);
 
     // ingredientId-put
     const ingredientIdPutLambda = new lambda.Function(this, 'ingredient-id-put', {
@@ -151,18 +149,18 @@ export class GutToWork extends cdk.Stack {
     ingredientIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdPutLambda);
 
-    // cars-licenseplate-delete-bohdan2
-    const licensePlateDeleteLambda = new lambda.Function(this, 'cars-licenseplate-delete', {
+     // feelingId-put
+     const feelingIdPutLambda = new lambda.Function(this, 'feeling-id-put', {
       runtime: lambda.Runtime.PYTHON_3_12,
-      functionName: 'cars-licenseplate-delete',
-      handler: 'delete.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, `../services/dev/lambdas/cars-licenseplate-delete`)),
+      functionName: 'feeling-id-put',
+      handler: 'put.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/feelings/{feeling_id}`)),
       environment: {
-        'DYNAMO_TABLE_NAME': table.tableName,
+        'DYNAMO_TABLE_NAME': feelings_table.tableName,
       },
     });
-    licensePlateDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
-    table.grantReadWriteData(licensePlateDeleteLambda);
+    feelingIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    feelings_table.grantReadWriteData(feelingIdPutLambda);
 
     // ingredientId-delete
     const ingredientIdDeleteLambda = new lambda.Function(this, 'ingredient-id-delete', {
@@ -177,6 +175,19 @@ export class GutToWork extends cdk.Stack {
     ingredientIdDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdDeleteLambda);
 
+
+    // feelingId-delete
+    const feelingIdDeleteLambda = new lambda.Function(this, 'feeling-id-delete', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      functionName: 'feeling-id-delete',
+      handler: 'delete.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, `../services/prod/lambdas/feelings/{feeling_id}`)),
+      environment: {
+        'DYNAMO_TABLE_NAME': feelings_table.tableName,
+      },
+    });
+    feelingIdDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
+    feelings_table.grantReadWriteData(feelingIdDeleteLambda);
     
 
     // -------------------------------

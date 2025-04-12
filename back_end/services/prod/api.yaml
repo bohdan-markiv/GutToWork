@@ -284,6 +284,114 @@ paths:
                   method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
                   method.response.header.Access-Control-Allow-Origin: "'*'"
 
+  /feelings/{feeling_id}:
+    get:
+      tags:
+        - Feelings
+      summary: List a single feeling record
+      description: Get details of a feeling record
+      parameters:
+        - name: feeling_id
+          in: path
+          description: feeling_id of the feeling record to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feeling"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:feeling-id-get/invocations
+    put:
+      x-amazon-apigateway-request-validator: body-only
+      tags:
+        - Feelings
+      summary: Update a feeling record 
+      description: Update a feeling record
+      requestBody:
+        description: Update a feeling record
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Feeling"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feeling"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:feeling-id-put/invocations
+    delete:
+      tags:
+        - Feelings
+      summary: Delete a feeling record
+      description: Delete a feeling record
+      parameters:
+        - name: feeling_id
+          in: path
+          description: feelingID of the poop record to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feeling"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:feeling-id-delete/invocations
+    options:
+      summary: CORS support
+      description: Enable CORS by returning the correct headers
+      responses:
+        "200":
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
 components:
   schemas:
     Ingredient:
@@ -313,14 +421,20 @@ components:
       required:
         - time_of_day
         - score
+        - feeling_date
       properties:
         time_of_day:
           type: string
           enum: [morning, afternoon, evening, night]
           example: morning
         score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 6
+        feeling_date: 
           type: string
-          example: 8 ## Chek how can make constraint on 1-10
+          example: 2025/03/24
     FeelingRecords:
       type: array
       items:

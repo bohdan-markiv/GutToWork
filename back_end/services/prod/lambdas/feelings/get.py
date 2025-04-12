@@ -6,7 +6,23 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+def parse_dynamo_data(data):
+    parsed = []
+    for item in data:
+        parsed_item = {}
+        for k, v in item.items():
+            # Get the first key (e.g., 'S' or 'N') and its value
+            dtype, val = next(iter(v.items()))
+            # Convert 'N' values to int or float
+            if dtype == "N":
+                parsed_item[k] = int(val) if val.isdigit() else float(val)
+            else:
+                parsed_item[k] = val
+        parsed.append(parsed_item)
+    return parsed
+
 def handler(event, context):
+    #create a DynamoDB resource
     try:
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
@@ -26,7 +42,10 @@ def handler(event, context):
     try:
         logger.info(response)
         items = response.get('Items', [])
-        
+        parsed_items = parse_dynamo_data(items)
+
+
+
     except Exception as e:
         logger.error(f"Parsing error - {e}", exc_info=True)
         return {
@@ -54,5 +73,5 @@ def handler(event, context):
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         },
-        'body': json.dumps(items)
+        'body': json.dumps(parsed_items)
     }
