@@ -128,6 +128,8 @@ export default function DashboardPage() {
     };
 
     // ----- Handle Ingredient Edit ----- 
+    
+
     const handleEditSubmit = async (updatedIngredient: Ingredient) => {
         try {
             await axios.put(
@@ -147,12 +149,9 @@ export default function DashboardPage() {
         }
     };
 
-    const handleCancelEdit = () => {
-        setSelectedIngredient(null); // Close the form without saving
-    };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'blue' }}>
+        <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}>
             <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
             {/* ----- Ingredients Table ----- */}
@@ -168,45 +167,58 @@ export default function DashboardPage() {
                 </TableHeader>
                 <TableBody>
                     {ingredients.map((ingredient) => (
-                        <TableRow key={ingredient["ingredients-id"]}>
+                        <TableRow 
+                            key={ingredient["ingredients-id"]} 
+                            onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
+                            className="cursor-pointer"
+                        >
                             <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell>
                             <TableCell>{ingredient.default_cooking_type}</TableCell>
                             <TableCell>{ingredient.default_portion_size}</TableCell>
                             <TableCell className="text-center">
-                                <AlertDialog>
-                                    <AlertDialogTrigger>
-                                        <Trash2 className="w-4 h-4" />
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. It will permanently delete this ingredient.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDelete(ingredient["ingredients-id"])}>Delete</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </TableCell>
-                            <TableCell className="text-center">
-                                <Button onClick={() => setSelectedIngredient(ingredient)}>Edit</Button>
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
+                                                {/* Trash icon inside the button */}
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. It will permanently delete this ingredient.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(ingredient["ingredients-id"])}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
 
-            {/* ----- Edit Ingredient Form ----- */}
             {selectedIngredient && (
-                <EditForm
-                    ingredient={selectedIngredient}
-                    onSubmit={handleEditSubmit}
-                    onCancel={handleCancelEdit}
-                />
+                <AlertDialog open={!!selectedIngredient} onOpenChange={() => setSelectedIngredient(null)}>
+                    <AlertDialogContent className="max-w-lg">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Edit Ingredient</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <EditForm
+                            ingredient={selectedIngredient}
+                            onSubmit={handleEditSubmit}
+                            onCancel={() => setSelectedIngredient(null)} // Close the dialog
+                        />
+                    </AlertDialogContent>
+                </AlertDialog>
             )}
+
 
             {/* ----- Create Ingredient Form via AlertDialog ----- */}
             <AlertDialog open={open} onOpenChange={setOpen}>
@@ -304,68 +316,69 @@ function EditForm({ ingredient, onSubmit, onCancel }: EditFormProps) {
     const [name, setName] = useState(ingredient.ingredient_name);
     const [cookingType, setCookingType] = useState(ingredient.default_cooking_type);
     const [size, setSize] = useState(ingredient.default_portion_size);
-
+  
     const handleSubmit = async () => {
-        const updatedIngredient = {
-            ...ingredient,
-            ingredient_name: name,
-            default_cooking_type: cookingType,
-            default_portion_size: size,
-        };
-        await onSubmit(updatedIngredient);
+      const updatedIngredient = {
+        ...ingredient,
+        ingredient_name: name,
+        default_cooking_type: cookingType,
+        default_portion_size: size,
+      };
+      await onSubmit(updatedIngredient);
     };
-
+  
     return (
+      <div>
         <div>
-            <h3>Edit Ingredient: {ingredient.ingredient_name}</h3>
-            <div>
-                <label>Ingredient Name:</label>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-            </div>
-            <div>
-                <label>Default Cooking Type:</label>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background">
-                            {cookingType || "Select Cooking Type"}
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuSeparator />
-                        {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
-                            <DropdownMenuItem key={type} onSelect={() => setCookingType(type)}>
-                                {type}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-            <div>
-                <label>Default Size:</label>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background">
-                            {size || "Select Portion Size"}
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuSeparator />
-                        {["small", "normal", "big"].map((sizeOption) => (
-                            <DropdownMenuItem key={sizeOption} onSelect={() => setSize(sizeOption)}>
-                                {sizeOption}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-            <div>
-                <Button onClick={handleSubmit}>Save</Button>
-                <Button onClick={onCancel}>Cancel</Button>
-            </div>
+          <label>Ingredient Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
+        <div>
+          <label>Default Cooking Type:</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background">
+                {cookingType || "Select Cooking Type"}
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuSeparator />
+              {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
+                <DropdownMenuItem key={type} onSelect={() => setCookingType(type)}>
+                  {type}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div>
+          <label>Default Size:</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background">
+                {size || "Select Portion Size"}
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuSeparator />
+              {["small", "normal", "big"].map((sizeOption) => (
+                <DropdownMenuItem key={sizeOption} onSelect={() => setSize(sizeOption)}>
+                  {sizeOption}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex space-x-2 mt-4">
+            <AlertDialogCancel asChild>
+                <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
+            </AlertDialogCancel>
+            <Button onClick={handleSubmit}>Save</Button>
+        </div>
+      </div>
     );
-}
+  }
