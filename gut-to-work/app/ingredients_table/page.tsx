@@ -155,54 +155,56 @@ export default function DashboardPage() {
             <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
             {/* ----- Ingredients Table ----- */}
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[100px]">Name</TableHead>
-                        <TableHead>Default Cooking style</TableHead>
-                        <TableHead>Default Size</TableHead>
-                        <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
-                        <TableHead className="w-[50px] text-center"></TableHead> {/* Edit */}
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {ingredients.map((ingredient) => (
-                        <TableRow 
-                            key={ingredient["ingredients-id"]} 
-                            onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
-                            className="cursor-pointer"
-                        >
-                            <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell>
-                            <TableCell>{ingredient.default_cooking_type}</TableCell>
-                            <TableCell>{ingredient.default_portion_size}</TableCell>
-                            <TableCell className="text-center">
-                                <div onClick={(e) => e.stopPropagation()}>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
-                                                {/* Trash icon inside the button */}
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. It will permanently delete this ingredient.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(ingredient["ingredients-id"])}>Delete</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                            </TableCell>
+            <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
+                <Table className="border-collapse">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[100px]">Name</TableHead>
+                            <TableHead>Default Cooking style</TableHead>
+                            <TableHead>Default Size</TableHead>
+                            <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
+                            <TableHead className="w-[50px] text-center"></TableHead> {/* Edit */}
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {ingredients.map((ingredient) => (
+                            <TableRow 
+                                key={ingredient["ingredients-id"]} 
+                                onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
+                                className="cursor-pointer"
+                            >
+                                <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell>
+                                <TableCell>{ingredient.default_cooking_type}</TableCell>
+                                <TableCell>{ingredient.default_portion_size}</TableCell>
+                                <TableCell className="text-center">
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
+                                                    {/* Trash icon inside the button */}
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. It will permanently delete this ingredient.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(ingredient["ingredients-id"])}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
 
             {selectedIngredient && (
                 <AlertDialog open={!!selectedIngredient} onOpenChange={() => setSelectedIngredient(null)}>
