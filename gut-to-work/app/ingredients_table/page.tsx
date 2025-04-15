@@ -51,6 +51,9 @@ import {
     AlertDialogDescription,
 } from "../components/AlertDialog";
 
+import { useToast } from "../components/use-toast"
+
+
 // ----- Zod Schema for Ingredient Form ----- 
 const formSchema = z.object({
     ingredient_name: z.string().nonempty("Ingredient name is required"),
@@ -91,6 +94,7 @@ export default function DashboardPage() {
     });
 
     // ----- Handle Form Submission ----- 
+    const { toast } = useToast();
     const onSubmit = async (data: FormData) => {
         try {
             const response = await axios.post(
@@ -110,6 +114,10 @@ export default function DashboardPage() {
             setIngredients((prev) => [...prev, newIngredient]);
             form.reset(); // Clear the form
             setOpen(false); // Close the dialog
+            toast({
+                title: "Success",
+                description: "Ingredient added successfully.",
+              });
         } catch (error) {
             console.error("Failed to create ingredient", error);
         }
@@ -180,7 +188,9 @@ export default function DashboardPage() {
                                     <div onClick={(e) => e.stopPropagation()}>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
+                                                <Button 
+                                                onClick={(e) => e.stopPropagation()} 
+                                                className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
                                                     {/* Trash icon inside the button */}
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>
@@ -237,7 +247,6 @@ export default function DashboardPage() {
                                     <FormControl>
                                         <Input placeholder="e.g., Potato" {...field} />
                                     </FormControl>
-                                    <FormDescription>Enter the name of the ingredient.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -249,7 +258,7 @@ export default function DashboardPage() {
                                     <FormControl>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
                                                     {field.value || "Select Cooking Type"}
                                                 </div>
                                             </DropdownMenuTrigger>
@@ -263,7 +272,6 @@ export default function DashboardPage() {
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </FormControl>
-                                    <FormDescription>Enter the usual cooking method.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -275,7 +283,7 @@ export default function DashboardPage() {
                                     <FormControl>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
                                                     {field.value || "Select Portion Size"}
                                                 </div>
                                             </DropdownMenuTrigger>
@@ -289,7 +297,6 @@ export default function DashboardPage() {
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </FormControl>
-                                    <FormDescription>Enter the default portion size.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -343,7 +350,7 @@ function EditForm({ ingredient, onSubmit, onCancel }: EditFormProps) {
           <label>Default Cooking Type:</label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background">
+              <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
                 {cookingType || "Select Cooking Type"}
               </div>
             </DropdownMenuTrigger>
@@ -361,7 +368,7 @@ function EditForm({ ingredient, onSubmit, onCancel }: EditFormProps) {
           <label>Default Size:</label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="w-full px-3 py-2 border border-input rounded-md cursor-pointer bg-background">
+              <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
                 {size || "Select Portion Size"}
               </div>
             </DropdownMenuTrigger>
@@ -375,7 +382,7 @@ function EditForm({ ingredient, onSubmit, onCancel }: EditFormProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="flex space-x-2 mt-4">
+        <div className="flex items-center justify-end space-x-4 mt-4">
             <AlertDialogCancel asChild>
                 <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
             </AlertDialogCancel>
