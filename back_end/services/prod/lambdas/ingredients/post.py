@@ -24,6 +24,51 @@ def handler(event, context):
     ingredient_name = event_body["ingredient_name"].strip().lower() 
     normalized_name = normalize_name(ingredient_name)
 
+
+    # Initialize DynamoDB client
+    dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
+
+    # Check if the ingredient_name already exists in the table
+    try:
+        response = dynamodb.scan(TableName='ingredients')     # Fetch all existing ingredients
+
+        for item in response.get('Items', []): #normalize existing names
+            existing_name = item.get("ingredient_name", {}).get("S", "").strip().lower() 
+            existing_normalized = normalize_name(existing_name)
+
+            # Exact Match Check
+            if existing_normalized == normalized_name:
+                return {
+                    'statusCode': 400,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': f"Ingredient '{event_body['ingredient_name']}' already exists."
+                }
+
+            # Partial Match Check 
+            if existing_normalized.startswith(normalized_name) or normalized_name.startswith(existing_normalized):
+                return {
+                    'statusCode': 400,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': f"Ingredient '{event_body['ingredient_name']}' already exists."
+                }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': f"Error checking for duplicate ingredient name - {e}"
+        }
+
+    # If no duplicate, create new item and insert it into DynamoDB
+
     try:
         item = {
                               "ingredients-id": {
@@ -48,49 +93,7 @@ def handler(event, context):
                 'body': f"Internal error occured - {e}"
             }
 
-    # Initialize DynamoDB client
-    dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
-
-    # Check if the ingredient_name already exists in the table
-    try:
-        response = dynamodb.scan(TableName='ingredients')     # Fetch all existing ingredients
-
-        for item in response.get('Items', []): #normalize existing names
-            existing_name = item.get("ingredient_name", {}).get("S", "").strip().lower() 
-            existing_normalized = normalize_name(existing_name)
-
-            # Exact Match Check
-            if existing_normalized == normalized_name:
-                return {
-                    'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': f"Ingredient '{event_body['ingredient_name']}' is too similar to an existing entry '{existing_name}'"
-                }
-
-            # Partial Match Check 
-            if existing_normalized.startswith(normalized_name) or normalized_name.startswith(existing_normalized):
-                return {
-                    'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': f"Ingredient '{event_body['ingredient_name']}' is too similar to an existing entry '{existing_name}'."
-                }
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': f"Error checking for duplicate ingredient name - {e}"
-        }
-
-    # If no duplicate, insert the new item into DynamoDB
+    
     try:
         dynamodb.put_item(TableName='ingredients', Item=item)
     except Exception as e:
@@ -109,5 +112,5 @@ def handler(event, context):
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         },
-        'body': f"New ingredient created with ID: {ingredient_id}"
+        'body': json.dumps({'ingredient_id': ingredient_id})
     }

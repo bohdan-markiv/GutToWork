@@ -18,6 +18,7 @@ export class GutToWork extends cdk.Stack {
       tableName: 'ingredients',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+
    
     // Create the poop table
     const poop_table = new dynamodb.Table(this, 'poop-table', {
@@ -41,6 +42,7 @@ export class GutToWork extends cdk.Stack {
     // -------------------------------
 
 
+
     // ingredients-get
     const ingredientsGetLambda = new lambda.Function(this, 'ingredients-get', {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -53,6 +55,7 @@ export class GutToWork extends cdk.Stack {
     });
     ingredientsGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientsGetLambda);
+
     
     // poop-get
     const poopGetLambda = new lambda.Function(this, 'poop-get', {
@@ -69,6 +72,7 @@ export class GutToWork extends cdk.Stack {
 
 
 
+
     //ingredients-post
     const ingredientsPostLambda = new lambda.Function(this, 'ingredients-post', {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -81,6 +85,7 @@ export class GutToWork extends cdk.Stack {
     });
     ingredientsPostLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientsPostLambda);
+
     
     //poop-post
     const poopPostLambda = new lambda.Function(this, 'poop-post', {
@@ -96,6 +101,7 @@ export class GutToWork extends cdk.Stack {
     poop_table.grantReadWriteData(poopPostLambda);
 
 
+
     // ingredientId-get
     const ingredientIdGetLambda = new lambda.Function(this, 'ingredient-id-get', {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -108,6 +114,7 @@ export class GutToWork extends cdk.Stack {
     });
     ingredientIdGetLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdGetLambda);
+
   
     // poopID-get
     const poopIdGetLambda = new lambda.Function(this, 'poop-id-get', {
@@ -123,6 +130,7 @@ export class GutToWork extends cdk.Stack {
     poop_table.grantReadWriteData(poopIdGetLambda);
 
 
+
     // ingredientId-put
     const ingredientIdPutLambda = new lambda.Function(this, 'ingredient-id-put', {
       runtime: lambda.Runtime.PYTHON_3_12,
@@ -135,6 +143,7 @@ export class GutToWork extends cdk.Stack {
     });
     ingredientIdPutLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     ingredients_table.grantReadWriteData(ingredientIdPutLambda);
+
 
 
     // poopId-put
@@ -163,6 +172,7 @@ export class GutToWork extends cdk.Stack {
     });
     poopIdDeleteLambda.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));
     poop_table.grantReadWriteData(poopIdDeleteLambda);
+
 
     // ingredientId-delete
     const ingredientIdDeleteLambda = new lambda.Function(this, 'ingredient-id-delete', {
