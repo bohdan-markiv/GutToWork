@@ -178,13 +178,6 @@ export class GutToWork extends cdk.Stack {
     ingredients_table.grantReadWriteData(ingredientIdDeleteLambda);
 
 
-    // -------------------------------
-    // Output the API Gateway endpoint URL for cars
-    // -------------------------------
-    new cdk.CfnOutput(this, 'ApiEndpoint', {
-      value: `https://${apiCars.restApiId}.execute-api.${this.region}.amazonaws.com/`,
-      description: 'The URL of the API Gateway endpoint',
-    });
 
        // -------------------------------
     // Output the API Gateway endpoint URL for ingredients

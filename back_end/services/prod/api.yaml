@@ -433,7 +433,9 @@ components:
           example: 3
         poop_date: 
           type: string
-          example: 2025/03/24
+          format: date
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          example: 2025-03-24
     PoopRecords:
       type: array
       items:
