@@ -27,193 +27,10 @@ x-amazon-apigateway-cors:
     - DELETE
     - OPTIONS
 paths:
-  /ingredients:
-    get:
-      tags:
-        - Ingredients
-      summary: List all ingredients
-      description: List ingredients
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Ingredients"
-        "405":
-          description: Invalid input
-        "404":
-          description: No ingredients found
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredients-get/invocations
-    post:
-      x-amazon-apigateway-request-validator: body-only
-      tags:
-        - Ingredients
-      summary: Register a new ingredient
-      description: Register a new ingredient after checking it doesn't already exist in the table
-      requestBody:
-        description: Create a new ingredient
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Ingredient"
-        required: false
-      responses:
-        "200":
-          description: Successful operation
-        "405":
-          description: Invalid input
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredients-post/invocations
-    options:
-      summary: CORS support
-      description: Enable CORS by returning the correct headers
-      responses:
-        "200":
-          description: Default response for CORS method
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-      x-amazon-apigateway-integration:
-        type: mock
-        requestTemplates:
-          application/json: |
-            {
-              "statusCode": 200
-            }
-        responses:
-          default:
-            statusCode: 200
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-
-  /ingredients/{ingredient_id}:
-    get:
-      tags:
-        - Ingredients
-      summary: List a single ingredient
-      description: Get details of an ingredient
-      parameters:
-        - name: ingredient_id
-          in: path
-          description: ingredient_id of the ingredient to return
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Ingredient"
-        "405":
-          description: Invalid input
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-get/invocations
-    put:
-      x-amazon-apigateway-request-validator: body-only
-      tags:
-        - Ingredients
-      summary: Update an ingredient
-      description: Update an ingredient
-      requestBody:
-        description: Update an ingredient
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Ingredient"
-        required: true
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Ingredient"
-        "405":
-          description: Invalid input
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-put/invocations
-    delete:
-      tags:
-        - Ingredients
-      summary: Delete an ingredient
-      description: Delete an ingredient
-      parameters:
-        - name: ingredient_id
-          in: path
-          description: ingredientID of the ingredient to delete
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Ingredient"
-        "405":
-          description: Invalid input
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ingredient-id-delete/invocations
-    options:
-      summary: CORS support
-      description: Enable CORS by returning the correct headers
-      responses:
-        "200":
-          description: Default response for CORS method
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-      x-amazon-apigateway-integration:
-        type: mock
-        requestTemplates:
-          application/json: |
-            {
-              "statusCode": 200
-            }
-        responses:
-          default:
-            statusCode: 200
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-            
-  /feeling:
+  /feelings:
     get:
         tags:
-          - Feeling
+          - Feelings
         summary: List all feeling records
         description: List feeling records
         responses:
@@ -234,8 +51,8 @@ paths:
     post:
           x-amazon-apigateway-request-validator: body-only
           tags:
-            - Feeling
-          summary: Register a new Feeling record
+            - Feelings
+          summary: Register a new Feeling record.
           description: Register a new feeling record after checking it doesn't already exist in the table
           requestBody:
             description: Create a new feeling record
@@ -394,44 +211,23 @@ paths:
               method.response.header.Access-Control-Allow-Origin: "'*'"
 components:
   schemas:
-    Ingredient:
-      type: object
-      required:
-        - ingredient_name
-        - default_portion_size
-      properties:
-        ingredient_name:
-          type: string
-          example: potato
-        default_portion_size:
-          type: string
-          enum: [big, normal, small]
-          example: small
-        default_cooking_type:
-          type: string
-          enum: [raw, boiled, deep fried, pan fried, baked, infused]
-          example: boiled
-    Ingredients:
-      type: array
-      items:
-        allOf:
-          - $ref: "#/components/schemas/Ingredient"
     Feeling:
       type: object
       required:
-        - time_of_day
-        - score
+        - feeling_score
+        - stress_level
         - feeling_date
       properties:
-        time_of_day:
-          type: string
-          enum: [morning, afternoon, evening, night]
-          example: morning
-        score:
+        feeling_score:
           type: integer
           minimum: 1
           maximum: 10
           example: 6
+        stress_level:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 5
         feeling_date: 
           type: string
           example: 2025/03/24
