@@ -24,10 +24,10 @@ def handler(event, context):
 
         
         # Build the update expression dynamically
-        update_expression = "SET feeling_score = :m, stress_level = :m, feeling_date = :l"
+        update_expression = "SET feeling_score = :m, stress_level = :s, feeling_date = :l"
         expression_values = {
             ":m": {'N': str(feeling_score)},
-            ":m": {'N': str(stress_level)},
+            ":s": {'N': str(stress_level)},
             ":l": {'S': feeling_date}
         }
 
