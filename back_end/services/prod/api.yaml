@@ -209,7 +209,188 @@ paths:
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
+  /poop:
+    get:
+        tags:
+          - Poop
+        summary: List all poop records
+        description: List poop records
+        responses:
+          "200":
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/PoopRecords"
+          "405":
+            description: Invalid input
+          "404":
+            description: No poop records found
+        x-amazon-apigateway-integration:
+          type: aws_proxy
+          httpMethod: POST
+          uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:poop-get/invocations
+    post:
+          x-amazon-apigateway-request-validator: body-only
+          tags:
+            - Poop
+          summary: Register a new poop record
+          description: Register a new poop record after checking it doesn't already exist in the table
+          requestBody:
+            description: Create a new poop record
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Poop"
+            required: false
+          responses:
+            "200":
+              description: Successful operation
+            "405":
+              description: Invalid input
+          x-amazon-apigateway-integration:
+            type: aws_proxy
+            httpMethod: POST
+            uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:poop-post/invocations
+    options:
+          summary: CORS support
+          description: Enable CORS by returning the correct headers
+          responses:
+            "200":
+              description: Default response for CORS method
+              headers:
+                Access-Control-Allow-Origin:
+                  schema:
+                    type: string
+                Access-Control-Allow-Methods:
+                  schema:
+                    type: string
+                Access-Control-Allow-Headers:
+                  schema:
+                    type: string
+          x-amazon-apigateway-integration:
+            type: mock
+            requestTemplates:
+              application/json: |
+                {
+                  "statusCode": 200
+                }
+            responses:
+              default:
+                statusCode: 200
+                responseParameters:
+                  method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                  method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                  method.response.header.Access-Control-Allow-Origin: "'*'"
 
+  /poop/{poop_id}:
+    get:
+      tags:
+        - Poop
+      summary: List a single poop record
+      description: Get details of a poop record
+      parameters:
+        - name: poop_id
+          in: path
+          description: poop_id of the poop record to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Poop"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:poop-id-get/invocations
+    put:
+      x-amazon-apigateway-request-validator: body-only
+      tags:
+        - Poop
+      summary: Update a poop record 
+      description: Update a poop record
+      requestBody:
+        description: Update a poop record
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Poop"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Poop"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:poop-id-put/invocations
+    delete:
+      tags:
+        - Poop
+      summary: Delete a poop record
+      description: Delete a poop record
+      parameters:
+        - name: poop_id
+          in: path
+          description: poopID of the poop record to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Poop"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:poop-id-delete/invocations
+    options:
+      summary: CORS support
+      description: Enable CORS by returning the correct headers
+      responses:
+        "200":
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
 components:
   schemas:
     Ingredient:
@@ -234,33 +415,30 @@ components:
       items:
         allOf:
           - $ref: "#/components/schemas/Ingredient"
-    Cars:
+    Poop:
+      type: object
+      required:
+        - time_of_day
+        - score
+        - poop_date
+      properties:
+        time_of_day:
+          type: string
+          enum: [morning, afternoon, evening, night]
+          example: morning
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 3
+        poop_date: 
+          type: string
+          format: date
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          example: 2025-03-24
+    PoopRecords:
       type: array
       items:
         allOf:
-          - $ref: "#/components/schemas/Car"
-          - $ref: "#/components/schemas/Registration"
-    Car:
-      type: object
-      required:
-        - brand
-        - model
-      properties:
-        brand:
-          type: string
-          example: BMW
-        model:
-          type: string
-          example: x7
-        color:
-          type: string
-    Registration:
-      type: object
-      properties:
-        registrationId:
-          type: integer
-          format: int64
-          example: 10
-        registrationDate:
-          type: string
-          format: date-time
+          - $ref: "#/components/schemas/Poop"
+    
