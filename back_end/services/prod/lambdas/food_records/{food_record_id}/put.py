@@ -29,29 +29,23 @@ def handler(event, context):
         update_expressions = []
         expression_values = {}
 
-        if inserted_date:
-            update_expressions.append("record_date = :d")
-            expression_values[":d"] = {'S': inserted_date}
+        update_expressions.append("record_date = :d")
+        expression_values[":d"] = {'S': inserted_date}
 
-        if ingredient_id:
-            update_expressions.append("ingredient_id = :i")
-            expression_values[":i"] = {'S': ingredient_id}
+        update_expressions.append("ingredient_id = :i")
+        expression_values[":i"] = {'S': ingredient_id}
 
-        if ingredient_name:
-            update_expressions.append("ingredient_name = :n")
-            expression_values[":n"] = {'S': ingredient_name}
+        update_expressions.append("ingredient_name = :n")
+        expression_values[":n"] = {'S': ingredient_name}
 
-        if portion_size:
-            update_expressions.append("portion_size = :p")
-            expression_values[":p"] = {'S': portion_size}
+        update_expressions.append("portion_size = :p")
+        expression_values[":p"] = {'S': portion_size}
 
-        if cooking_type:
-            update_expressions.append("cooking_type = :c")
-            expression_values[":c"] = {'S': cooking_type}
+        update_expressions.append("cooking_type = :c")
+        expression_values[":c"] = {'S': cooking_type}
 
-        if time_of_day:
-            update_expressions.append("time_of_day = :t")
-            expression_values[":t"] = {'S': time_of_day}
+        update_expressions.append("time_of_day = :t")
+        expression_values[":t"] = {'S': time_of_day}
 
         if not update_expressions:
             return {

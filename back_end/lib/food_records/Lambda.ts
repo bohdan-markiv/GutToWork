@@ -16,7 +16,7 @@ export function createFoodRecordsLambdas(
   scope: Construct,
   table: dynamodb.Table
 ): FoodRecordsLambdas {
-  // ingredients-get Lambda
+  // food-records-get Lambda
   const foodRecordsGet = new lambda.Function(scope, "food-records-get", {
     runtime: lambda.Runtime.PYTHON_3_12,
     functionName: "food-records-get",
@@ -33,7 +33,7 @@ export function createFoodRecordsLambdas(
   );
   table.grantReadWriteData(foodRecordsGet);
 
-  // ingredients-post Lambda
+  // food-records-post Lambda
   const foodRecordsPost = new lambda.Function(scope, "food-record-post", {
     runtime: lambda.Runtime.PYTHON_3_12,
     functionName: "food-record-post",
@@ -70,7 +70,7 @@ export function createFoodRecordsLambdas(
   );
   table.grantReadWriteData(foodRecordIdGet);
 
-  // ingredient-id-put Lambda
+  // food-record-id-put Lambda
   const foodRecordIdPut = new lambda.Function(scope, "food-record-id-put", {
     runtime: lambda.Runtime.PYTHON_3_12,
     functionName: "food-record-id-put",
