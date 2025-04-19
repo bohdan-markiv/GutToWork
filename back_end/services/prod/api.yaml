@@ -390,6 +390,193 @@ paths:
             responseParameters:
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"  
+  /food_records:
+    get:
+      tags:
+        - Food Records
+      summary: List all the food records
+      description: List all the food records
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodRecords"
+        "405":
+          description: Invalid input
+        "404":
+          description: No food records found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:food-records-get/invocations
+    post:
+      x-amazon-apigateway-request-validator: body-only
+      tags:
+        - Food Records
+      summary: Log a new food record
+      description: Post a new food record information
+      requestBody:
+        description: Food record body
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodRecord"
+        required: false
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:food-record-post/invocations
+    options:
+      summary: CORS support
+      description: Enable CORS by returning the correct headers
+      responses:
+        "200":
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+  /food_records/{food_record_id}:
+    get:
+      tags:
+        - Food Records
+      summary: List a single food record
+      description: Get details of a food record
+      parameters:
+        - name: food_record_id
+          in: path
+          description: food_record_id of the record to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodRecord"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:food-record-id-get/invocations
+    put:
+      x-amazon-apigateway-request-validator: body-only
+      tags:
+        - Food Records
+      summary: Update a food record
+      description: Update a food record
+      parameters:
+        - name: food_record_id
+          in: path
+          description: food_record_id of the record to change
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update a food record
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodRecord"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodRecord"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:food-record-id-put/invocations
+    delete:
+      tags:
+        - Food Records
+      summary: Delete a food record
+      description: Delete a food record
+      parameters:
+        - name: food_record_id
+          in: path
+          description: food_record_id of the record to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodRecord"
+        "405":
+          description: Invalid input
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:food-record-id-delete/invocations
+    options:
+      summary: CORS support
+      description: Enable CORS by returning the correct headers
+      responses:
+        "200":
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
 components:
   schemas:
@@ -441,4 +628,40 @@ components:
       items:
         allOf:
           - $ref: "#/components/schemas/Poop"
-    
+    FoodRecord:
+      type: object
+      required:
+        - record_date
+        - ingredient_id
+        - ingredient_name
+        - portion_size
+        - cooking_type
+        - time_of_day
+      properties:
+          record_date:
+            type: string
+            format: date
+          ingredient_id:
+            type: string
+            example: sjdvnuisfdvsdinv
+          ingredient_name:
+            type: string
+            example: potato
+          portion_size:
+            type: string
+            enum: [big, normal, small]
+            example: small
+          cooking_type:
+            type: string
+            enum: [raw, boiled, deep fried, pan fried, baked, infused]
+            example: boiled
+          time_of_day:
+            type: string
+            enum: [morning, afternoon, noon, night]
+            example: morning
+
+    FoodRecords:
+      type: array
+      items:
+        allOf:
+        - $ref: "#/components/schemas/FoodRecord"
