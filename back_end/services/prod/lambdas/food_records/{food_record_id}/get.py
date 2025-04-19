@@ -6,23 +6,29 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+def parse_dynamo_data(data):
+    return [{k: v["S"] for k, v in item.items()} for item in data]
+
+
 def handler(event, context):
     logger.info(event)
 
-    license_plate = event["pathParameters"]["registrationId"]
+    food_record_id = event["pathParameters"]["food_record_id"]
 
     try:
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
-        # Use get_item instead of scan (requires 'car-id' is the partition key)
+        # Use get_item instead of scan (requires 'food-record-id' as the partition key)
         response = dynamodb.get_item(
-            TableName='cars-cdk',
+            TableName='food_records',
             Key={
-                'car-id': {'S': license_plate}
+                'food-record-id': {'S': food_record_id}
             }
         )
 
         item = response.get('Item')
+
+        parsed_item = parse_dynamo_data([item])[0]
         if not item:
             return {
                 'statusCode': 404,
@@ -30,7 +36,7 @@ def handler(event, context):
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
                 },
-                'body': json.dumps({'error': f"No item found for license plate '{license_plate}'"})
+                'body': json.dumps({'error': f"No item found for ingredient-id '{food_record_id}'"})
             }
 
         return {
@@ -39,7 +45,7 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps(item)
+            'body': json.dumps(parsed_item)
         }
 
     except Exception as e:

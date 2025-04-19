@@ -1,7 +1,7 @@
 import boto3
 import json
 import logging
-import os
+from datetime import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -11,34 +11,29 @@ def handler(event, context):
     logger.info(f"Received event: {event}")
 
     try:
-        # Parse the registration ID from the path parameters
-        license_plate = event["pathParameters"]["registrationId"]
-
-        # Parse the request body (API Gateway sends it as a JSON string)
+        poop_id = event["pathParameters"]["poop_id"]
         body = json.loads(event["body"])
-        brand = body.get("brand")
-        model = body.get("model")
 
+        time_of_day = body["time_of_day"]
+        score = body["score"]
+        poop_date = body["poop_date"]
+
+        
         # Initialize DynamoDB client
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
         # Build the update expression dynamically
-        update_expressions = []
-        expression_values = {}
-
-        if brand:
-            update_expressions.append("brand = :b")
-            expression_values[":b"] = {'S': brand}
-        if model:
-            update_expressions.append("model = :m")
-            expression_values[":m"] = {'S': model}
-
-        update_expression = "SET " + ", ".join(update_expressions)
+        update_expression = "SET time_of_day = :n, score = :m, poop_date = :l"
+        expression_values = {
+            ":n": {'S': time_of_day},
+            ":m": {'N': str(score)},
+            ":l": {'S': poop_date}
+        }
 
         # Perform the update
         response = dynamodb.update_item(
-            TableName='cars-cdk',
-            Key={'car-id': {'S': license_plate}},
+            TableName='poop',
+            Key={'poop-id': {'S': poop_id}},
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_values,
             ReturnValues="UPDATED_NEW"
@@ -52,7 +47,7 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': "Update was successful" + json.dumps(response['Attributes'])
+            'body': json.dumps({"message": "Update was successful"})
         }
 
     except Exception as e:

@@ -11,7 +11,7 @@ def handler(event, context):
 
     try:
         # Parse the registration ID from the path parameters
-        ingredient_id = event["pathParameters"]["ingredient_id"]
+        poop_id = event["pathParameters"]["poop_id"]
 
         # Initialize DynamoDB client
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
@@ -19,8 +19,8 @@ def handler(event, context):
         # Delete the item with the matching key
 
         response = dynamodb.delete_item(
-            TableName='ingredients',
-            Key={'ingredients-id': {'S': ingredient_id}}
+            TableName='poop',
+            Key={'poop-id': {'S': poop_id}}
         )
 
         logger.info(f"DeleteItem response: {response}")
@@ -31,7 +31,9 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'ingredient_id': ingredient_id})
+            'body': json.dumps({
+                'message': f"Item with poop_id '{poop_id}' was deleted successfully"
+            })
         }
 
     except Exception as e:

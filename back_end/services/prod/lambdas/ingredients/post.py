@@ -44,7 +44,7 @@ def handler(event, context):
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': f"Ingredient '{event_body['ingredient_name']}' is too similar to an existing entry '{existing_name}'"
+                    'body': f"Ingredient '{event_body['ingredient_name']}' already exists."
                 }
 
             # Partial Match Check 
@@ -55,7 +55,7 @@ def handler(event, context):
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': f"Ingredient '{event_body['ingredient_name']}' is too similar to an existing entry '{existing_name}'."
+                    'body': f"Ingredient '{event_body['ingredient_name']}' already exists."
                 }
     except Exception as e:
         return {
@@ -112,5 +112,5 @@ def handler(event, context):
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         },
-        'body': f"New ingredient created with ID: {ingredient_id}"
+        'body': json.dumps({'ingredient_id': ingredient_id})
     }
