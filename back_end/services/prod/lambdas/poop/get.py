@@ -6,22 +6,16 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 def parse_dynamo_data(data):
     parsed = []
     for item in data:
         parsed_item = {}
         for k, v in item.items():
-            # Get the first key (e.g., 'S' or 'N') and its value
-            dtype, val = next(iter(v.items()))
-            # Convert 'N' values to int or float
-            if dtype == "N":
-                parsed_item[k] = int(val) if val.isdigit() else float(val)
-            else:
-                parsed_item[k] = val
+            dtype, val = next(iter(v.items()))  # e.g., {'N': '5'} or {'S': '2025-04-20'}
+            parsed_item[k] = int(val) if dtype == "N" else val
         parsed.append(parsed_item)
     return parsed
-
-
 
 def handler(event, context):
     # Create a DynamoDB resource

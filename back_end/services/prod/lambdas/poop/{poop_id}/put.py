@@ -47,7 +47,7 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({"message": "Update was successful"})
+            'body': json.dumps(response['Attributes'])  
         }
 
     except Exception as e:

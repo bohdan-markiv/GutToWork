@@ -9,17 +9,8 @@ logger.setLevel(logging.INFO)
 
 # Helper function to convert raw DynamoDB types into standard Python data
 def parse_dynamo_data(data):
-    parsed = []
-    for item in data:
-        parsed_item = {}
-        for k, v in item.items():
-            dtype, val = next(iter(v.items()))  # e.g., {'N': '5'} → dtype='N', val='5'
-            if dtype == "N":
-                parsed_item[k] = int(val) if val.isdigit() else float(val)  # Convert number strings
-            else:
-                parsed_item[k] = val  # Use string as-is
-        parsed.append(parsed_item)
-    return parsed
+    return [{k: int(v["N"]) if "N" in v else v["S"] for k, v in item.items()} for item in data]
+
 
 # Lambda entry point
 def handler(event, context):

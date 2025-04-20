@@ -8,19 +8,8 @@ logger.setLevel(logging.INFO)
 
 # Helper function to convert DynamoDB item format to plain Python dict
 def parse_dynamo_data(data):
-    parsed = []
-    for item in data:
-        parsed_item = {}
-        for k, v in item.items():
-            # Get the data type (e.g., 'S' for string, 'N' for number) and its value
-            dtype, val = next(iter(v.items()))
-            # Convert numeric strings to actual int or float
-            if dtype == "N":
-                parsed_item[k] = int(val) if val.isdigit() else float(val)
-            else:
-                parsed_item[k] = val
-        parsed.append(parsed_item)
-    return parsed
+    return [{k: int(v["N"]) if "N" in v else v["S"] for k, v in item.items()} for item in data]
+
 
 def handler(event, context):
     logger.info(event)  # Log the incoming event

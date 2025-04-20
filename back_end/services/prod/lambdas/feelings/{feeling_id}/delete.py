@@ -32,9 +32,10 @@ def handler(event, context):
                 'Access-Control-Allow-Origin': '*'
             },
             'body': json.dumps({
-                'message': f"Item with poop_id '{feeling_id}' was deleted successfully"
+                "feeling_id": feeling_id
             })
         }
+    
 
     except Exception as e:
         # Handle errors during deletion

@@ -36,7 +36,7 @@ export class GutToWork extends cdk.Stack {
 
     const foodLambdas = createFoodRecordsLambdas(this, foodRecordsTable);
     const poopLambdas = createPoopLambdas(this, poopTable);
-    const feelingsLambdas = createPoopLambdas(this, feelingsTable);
+    const feelingsLambdas = createFeelingsLambdas(this, feelingsTable);
 
     // Optionally, you can access individual Lambdas:
     // ingredientsLambdas.get, ingredientsLambdas.post, etc.
