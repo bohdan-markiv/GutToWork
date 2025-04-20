@@ -66,6 +66,8 @@ export default function DashboardPage() {
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
     const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
     const [open, setOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // ----- Fetch Ingredients ----- 
     useEffect(() => {
@@ -112,8 +114,18 @@ export default function DashboardPage() {
             setIngredients((prev) => [...prev, newIngredient]);
             form.reset(); // Clear the form
             setOpen(false); // Close the dialog
+            setSuccessMessage("Ingredient successfully created!");
+            setErrorMessage(null) // Set the success message
+            setTimeout(() => {
+                setSuccessMessage(null); // Hide the message after 3 seconds
+            }, 3000);
         } catch (error) {
             console.error("Failed to create ingredient", error);
+            setErrorMessage("Failed to create ingredient. Please try again."); // Set the error message
+            setSuccessMessage(null);
+            setTimeout(() => {
+                setErrorMessage(null);
+            }, 3000);
         }
     };
 
@@ -124,8 +136,18 @@ export default function DashboardPage() {
                 `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${id}`
             );
             setIngredients((prev) => prev.filter((item) => item["ingredients-id"] !== id));
+            setSuccessMessage("Ingredient successfully deleted!");
+            setErrorMessage(null) // Set the success message
+            setTimeout(() => {
+                setSuccessMessage(null); // Hide the message after 3 seconds
+            }, 3000);
         } catch (error) {
             console.error("Failed to delete ingredient", error);
+            setErrorMessage("Failed to delete ingredient. Please try again."); // Set the error message
+            setSuccessMessage(null);
+            setTimeout(() => {
+                setErrorMessage(null);
+            }, 3000);
         }
     };
 
@@ -145,9 +167,19 @@ export default function DashboardPage() {
                         : item
                 )
             );
-            setSelectedIngredient(null); // Close the form
+            setSuccessMessage("Ingredient updated successfully!");
+            setErrorMessage(null); // Reset error message on success
+            setTimeout(() => {
+                setSuccessMessage(null); // Hide the success message after 3 seconds
+            }, 3000);
+            setSelectedIngredient(null); // Close the dialog
         } catch (error) {
             console.error("Failed to update ingredient", error);
+            setErrorMessage("Failed to update ingredient. Please try again.");
+            setSuccessMessage(null); // Reset success message on error
+            setTimeout(() => {
+                setErrorMessage(null); // Hide the error message after 3 seconds
+            }, 3000);
         }
     };
 
@@ -155,6 +187,13 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}>
             <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
+
+            {/* ----- Display Success Message ----- */}
+            {successMessage && (
+                <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
+                    <strong>{successMessage}</strong>
+                </div>
+            )}
 
             {/* ----- Ingredients Table ----- */}
             <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
@@ -190,6 +229,9 @@ export default function DashboardPage() {
                                                 </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
+                                                {errorMessage && (
+                                                    <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>
+                                                )}
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                     <AlertDialogDescription>
@@ -210,6 +252,7 @@ export default function DashboardPage() {
                 </Table>
             </div>
 
+            
             {selectedIngredient && (
                 <AlertDialog open={!!selectedIngredient} onOpenChange={() => setSelectedIngredient(null)}>
                     <AlertDialogContent className="max-w-lg">
@@ -220,6 +263,8 @@ export default function DashboardPage() {
                             ingredient={selectedIngredient}
                             onSubmit={handleEditSubmit}
                             onCancel={() => setSelectedIngredient(null)} // Close the dialog
+                            successMessage={successMessage}
+                            errorMessage={errorMessage}
                         />
                     </AlertDialogContent>
                 </AlertDialog>
@@ -232,6 +277,9 @@ export default function DashboardPage() {
                     <Button className="mt-4 hover:!bg-gray-500">Create Ingredient</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
+                    {errorMessage && (
+                        <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>
+                    )}
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                             {/* Ingredient Name */}
@@ -313,75 +361,97 @@ type EditFormProps = {
     ingredient: Ingredient;
     onSubmit: (updatedIngredient: Ingredient) => void;
     onCancel: () => void;
+    successMessage: string | null;
+    errorMessage: string | null;
 };
-
-function EditForm({ ingredient, onSubmit, onCancel }: EditFormProps) {
+function EditForm({ ingredient, onSubmit, onCancel, successMessage, errorMessage }: EditFormProps) {
     const [name, setName] = useState(ingredient.ingredient_name);
     const [cookingType, setCookingType] = useState(ingredient.default_cooking_type);
     const [size, setSize] = useState(ingredient.default_portion_size);
-  
+
     const handleSubmit = async () => {
-      const updatedIngredient = {
-        ...ingredient,
-        ingredient_name: name,
-        default_cooking_type: cookingType,
-        default_portion_size: size,
-      };
-      await onSubmit(updatedIngredient);
+        const updatedIngredient = {
+            ...ingredient,
+            ingredient_name: name,
+            default_cooking_type: cookingType,
+            default_portion_size: size,
+        };
+        try {
+            await onSubmit(updatedIngredient);
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
     };
-  
+
     return (
-      <div>
         <div>
-          <label>Ingredient Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+            {/* Success Message */}
+            {successMessage && (
+                <div className="mb-3 p-2 rounded-md bg-green-100 text-green-700 border border-green-300 text-sm font-medium">
+                    {successMessage}
+                </div>
+            )}
+
+            {/* Error Message */}
+            {errorMessage && (
+                <div className="mb-3 p-2 rounded-md bg-red-100 text-red-700 border border-red-300 text-sm font-medium">
+                    {errorMessage}
+                </div>
+            )}
+
+            <div>
+                <label>Ingredient Name:</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+            </div>
+
+            <div>
+                <label>Default Cooking Type:</label>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                            {cookingType || "Select Cooking Type"}
+                        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuSeparator />
+                        {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
+                            <DropdownMenuItem key={type} onSelect={() => setCookingType(type)}>
+                                {type}
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+
+            <div>
+                <label>Default Size:</label>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                            {size || "Select Portion Size"}
+                        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuSeparator />
+                        {["small", "normal", "big"].map((sizeOption) => (
+                            <DropdownMenuItem key={sizeOption} onSelect={() => setSize(sizeOption)}>
+                                {sizeOption}
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+
+            <div className="flex items-center justify-end space-x-4 mt-4">
+                <AlertDialogCancel asChild>
+                    <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
+                </AlertDialogCancel>
+                <Button onClick={handleSubmit}>Save</Button>
+            </div>
         </div>
-        <div>
-          <label>Default Cooking Type:</label>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                {cookingType || "Select Cooking Type"}
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuSeparator />
-              {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
-                <DropdownMenuItem key={type} onSelect={() => setCookingType(type)}>
-                  {type}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div>
-          <label>Default Size:</label>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                {size || "Select Portion Size"}
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuSeparator />
-              {["small", "normal", "big"].map((sizeOption) => (
-                <DropdownMenuItem key={sizeOption} onSelect={() => setSize(sizeOption)}>
-                  {sizeOption}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="flex items-center justify-end space-x-4 mt-4">
-            <AlertDialogCancel asChild>
-                <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
-            </AlertDialogCancel>
-            <Button onClick={handleSubmit}>Save</Button>
-        </div>
-      </div>
     );
-  }
+}
