@@ -51,7 +51,6 @@ import {
     AlertDialogDescription,
 } from "../components/AlertDialog";
 
-import { useToast } from "../components/use-toast"
 
 
 // ----- Zod Schema for Ingredient Form ----- 
@@ -94,7 +93,6 @@ export default function DashboardPage() {
     });
 
     // ----- Handle Form Submission ----- 
-    const { toast } = useToast();
     const onSubmit = async (data: FormData) => {
         try {
             const response = await axios.post(
@@ -114,10 +112,6 @@ export default function DashboardPage() {
             setIngredients((prev) => [...prev, newIngredient]);
             form.reset(); // Clear the form
             setOpen(false); // Close the dialog
-            toast({
-                title: "Success",
-                description: "Ingredient added successfully.",
-              });
         } catch (error) {
             console.error("Failed to create ingredient", error);
         }
