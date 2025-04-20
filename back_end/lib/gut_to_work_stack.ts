@@ -19,6 +19,7 @@ export class GutToWork extends cdk.Stack {
     const ingredientsTable = createIngredientsTable(this);
     const foodRecordsTable = createFoodRecordsTable(this);
     const poopTable = createPoopTable(this);
+    const feelingsTable = createFeelingsTable(this);
 
     // Import the OpenAPI spec
     const openApiSpecProd = apigateway.AssetApiDefinition.fromAsset(
@@ -35,6 +36,7 @@ export class GutToWork extends cdk.Stack {
 
     const foodLambdas = createFoodRecordsLambdas(this, foodRecordsTable);
     const poopLambdas = createPoopLambdas(this, poopTable);
+    const feelingsLambdas = createPoopLambdas(this, feelingsTable);
 
     // Optionally, you can access individual Lambdas:
     // ingredientsLambdas.get, ingredientsLambdas.post, etc.
