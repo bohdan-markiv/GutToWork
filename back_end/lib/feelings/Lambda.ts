@@ -22,7 +22,7 @@ export function createFeelingsLambdas(
     functionName: "feelings-get",
     handler: "get.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/feelings`)
+      path.join(__dirname, `../../services/prod/lambdas/feelings`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -39,7 +39,7 @@ export function createFeelingsLambdas(
     functionName: "feelings-post",
     handler: "post.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/feelings`)
+      path.join(__dirname, `../../services/prod/lambdas/feelings`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -56,7 +56,7 @@ export function createFeelingsLambdas(
     functionName: "feelings-id-get",
     handler: "get.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/feelings/{feelings_id}`)
+      path.join(__dirname, `../../services/prod/lambdas/feelings/{feeling_id}`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -73,7 +73,7 @@ export function createFeelingsLambdas(
     functionName: "feelings-id-put",
     handler: "put.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/feelings/{feelings_id}`)
+      path.join(__dirname, `../../services/prod/lambdas/feelings/{feeling_id}`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -93,7 +93,10 @@ export function createFeelingsLambdas(
       functionName: "feelings-id-delete",
       handler: "delete.handler",
       code: lambda.Code.fromAsset(
-        path.join(__dirname, `../services/prod/lambdas/feelings/{feelings_id}`)
+        path.join(
+          __dirname,
+          `../../services/prod/lambdas/feelings/{feeling_id}`
+        )
       ),
       environment: {
         DYNAMO_TABLE_NAME: table.tableName,

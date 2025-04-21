@@ -22,7 +22,7 @@ export function createPoopLambdas(
     functionName: "poop-get",
     handler: "get.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/poop`)
+      path.join(__dirname, `../../services/prod/lambdas/poop`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -39,7 +39,7 @@ export function createPoopLambdas(
     functionName: "poop-post",
     handler: "post.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/poop`)
+      path.join(__dirname, `../../services/prod/lambdas/poop`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -56,7 +56,7 @@ export function createPoopLambdas(
     functionName: "poop-id-get",
     handler: "get.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/poop/{poop_id}`)
+      path.join(__dirname, `../../services/prod/lambdas/poop/{poop_id}`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -73,7 +73,7 @@ export function createPoopLambdas(
     functionName: "poop-id-put",
     handler: "put.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/poop/{poop_id}`)
+      path.join(__dirname, `../../services/prod/lambdas/poop/{poop_id}`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
@@ -90,7 +90,7 @@ export function createPoopLambdas(
     functionName: "poop-id-delete",
     handler: "delete.handler",
     code: lambda.Code.fromAsset(
-      path.join(__dirname, `../services/prod/lambdas/poop/{poop_id}`)
+      path.join(__dirname, `../../services/prod/lambdas/poop/{poop_id}`)
     ),
     environment: {
       DYNAMO_TABLE_NAME: table.tableName,
