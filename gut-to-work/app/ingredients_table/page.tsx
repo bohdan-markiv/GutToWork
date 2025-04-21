@@ -204,7 +204,6 @@ export default function DashboardPage() {
                             <TableHead>Default Cooking style</TableHead>
                             <TableHead>Default Size</TableHead>
                             <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Edit */}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
