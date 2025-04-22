@@ -779,7 +779,7 @@ components:
           example: 5
         feeling_date:
           type: string
-          example: 2025/03/24
+          example: 2025-03-24
     FeelingRecords:
       type: array
       items:
