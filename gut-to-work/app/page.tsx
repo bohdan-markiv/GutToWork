@@ -17,7 +17,7 @@ export default function MainPage() {
           className="mt-4 hover:!bg-gray-500" // Use hover:!bg-gray-500 if you need to force the override
           onClick={() => router.push("/choice_table")}
         >
-          Get Started
+        Get Started
         </Button>
         <Button
           className="mt-4 hover:!bg-gray-500" // Use hover:!bg-gray-500 if you need to force the override
@@ -25,7 +25,6 @@ export default function MainPage() {
         >
           Ingredients
         </Button>
-
       </div>
     </div>
   );

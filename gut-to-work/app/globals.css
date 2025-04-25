@@ -4,25 +4,24 @@
 
 /* ----- Custom Properties ----- */
 :root {
-  --background: #8d8c8c;
-  --foreground: #171717;
-  --primary: #1d4ed8;
-  /* Blue shade */
-  --secondary: #059669;
-  /* Teal shade */
-  --accent: #f97316;
-  /* Orange shade */
+  --background: #daeffb; /* Light blue */
+  --foreground: #000B4B; /* Dark blue */
+  --primary: #1CADE6; /* Soft blue */
+  --secondary: #DBDBDB; /* Light pink */
+  --accent: #DBDBDB; /* gray scale version of #f9c9ed pink from logo */
   --border-radius: 0.5rem;
   --transition: 0.3s ease;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --primary: #3b82f6;
-    --secondary: #10b981;
-    --accent: #f59e0b;
+    --background: #000B4B; /* Dark blue */
+    --foreground: #ecf0f1; /* Light gray */
+    --primary: #1CADE6; /* Soft blue */
+    --secondary: #DBDBDB; /* Light pink */
+    --accent: #DBDBDB; /* gray scale version of #f9c9ed pink from logo */
+    --border-radius: 0.5rem;
+    --transition: 0.3s ease;
   }
 }
 

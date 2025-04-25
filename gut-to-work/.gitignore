@@ -40,10 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-<<<<<<< HEAD:gut-to-work/.gitignore
-node_modules/
-=======
 
 cdk.out
 node_modules
->>>>>>> development:.gitignore
