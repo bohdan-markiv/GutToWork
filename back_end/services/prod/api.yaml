@@ -840,7 +840,7 @@ components:
           example: boiled
         time_of_day:
           type: string
-          enum: [morning, afternoon, noon, night]
+          enum: [morning, afternoon, evening, night]
           example: morning
 
     FoodRecords:
