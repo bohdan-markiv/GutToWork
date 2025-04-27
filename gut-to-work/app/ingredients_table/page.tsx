@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "../components/Button";
-import {
+import { // This can be seen in ui.shadcn.com as seen in this link https://ui.shadcn.com/docs/components/table
     Table,
     TableBody,
     TableCell,
@@ -17,7 +17,7 @@ import {
     TableHeader,
     TableRow,
 } from "../components/Table";
-import { Ingredient } from "../types";
+import { Ingredient } from "../types";  // Defined in Types.ts
 
 import {
     Form,
@@ -53,16 +53,16 @@ import {
 
 
 
-// ----- Zod Schema for Ingredient Form ----- 
+// ----- Zod Schema for Ingredient Form -----  "Look at the schema I made and generate a TypeScript type that matches it."
 const formSchema = z.object({
-    ingredient_name: z.string().nonempty("Ingredient name is required"),
+    ingredient_name: z.string().nonempty("Ingredient name is required"), //ingredient_name: must be a string, and it cannot be empty. If it is empty, show the error message: "Ingredient name is required".
     default_cooking_type: z.string().nonempty("Default cooking type is required"),
     default_size: z.string().nonempty("Default size is required"),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>; // typeof formSchema tells it: "Use the shape of the formSchema I just wrote."
 
-export default function DashboardPage() {
+export default function DashboardPage() {  // Creating a page component. This defines the things that are on the Page. Prepares all things you need to store ing, select ingredients, open/close modals and show success error messages inside the page.
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
     const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
     const [open, setOpen] = useState(false);
@@ -70,11 +70,11 @@ export default function DashboardPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // ----- Fetch Ingredients ----- 
-    useEffect(() => {
+    useEffect(() => {  // This is how we do the connection to AWS (the backend) 
         const fetchData = async () => {
             try {
                 const response = await axios.get(
-                    "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients"
+                    "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients" // Take data from the table ingredients
                 );
                 setIngredients(response.data);
             } catch (error) {
@@ -84,26 +84,27 @@ export default function DashboardPage() {
         fetchData();
     }, []);
 
-    // ----- React Hook Form Setup for Creating Ingredient ----- 
-    const form = useForm<FormData>({
-        resolver: zodResolver(formSchema),
+    // ----- React Hook Form Setup for Creating Ingredient ----- // Also quite Important
+    //You are creating a form instance using React Hook Form.
+    const form = useForm<FormData>({ //"This form will use the type FormData" This helps TypeScript know exactly what fields the form expects.
+        resolver: zodResolver(formSchema), //You connect Zod validation to the form.
         defaultValues: {
             ingredient_name: "",
-            default_cooking_type: "",
+            default_cooking_type: "", //This means the Form which is in the dialog box is empty by default. ie: when we want to add a new ingredient. 
             default_size: "",
         },
     });
 
-    // ----- Handle Form Submission ----- 
+    // ----- Handle Form Submission -----  User submits the form → This onSubmit function gets triggered.
     const onSubmit = async (data: FormData) => {
         try {
-            const response = await axios.post(
+            const response = await axios.post( //You send a POST request (axios.post) to your AWS API to create a new ingredient.
                 "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients",
                 {
                     ingredient_name: data.ingredient_name,
                     default_cooking_type: data.default_cooking_type,
                     default_portion_size: data.default_size,
-                }
+                } // (based on what the user typed in the form — data comes from the form.)
             );
             const newIngredient: Ingredient = {
                 ingredient_name: data.ingredient_name,
@@ -111,7 +112,7 @@ export default function DashboardPage() {
                 "ingredients-id": response.data,
                 default_portion_size: data.default_size,
             };
-            setIngredients((prev) => [...prev, newIngredient]);
+            setIngredients((prev) => [...prev, newIngredient]); //Take previous plus new ingredient. Adds the new ingredient to your ingredients list immediately on the page.
             form.reset(); // Clear the form
             setOpen(false); // Close the dialog
             setSuccessMessage("Ingredient successfully created!");
@@ -135,7 +136,7 @@ export default function DashboardPage() {
             await axios.delete(
                 `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${id}`
             );
-            setIngredients((prev) => prev.filter((item) => item["ingredients-id"] !== id));
+            setIngredients((prev) => prev.filter((item) => item["ingredients-id"] !== id)); //This button part is here cause If not it wouldnt update in our visual only in aws. 
             setSuccessMessage("Ingredient successfully deleted!");
             setErrorMessage(null) // Set the success message
             setTimeout(() => {
@@ -145,7 +146,7 @@ export default function DashboardPage() {
             console.error("Failed to delete ingredient", error);
             setErrorMessage("Failed to delete ingredient. Please try again."); // Set the error message
             setSuccessMessage(null);
-            setTimeout(() => {
+            setTimeout(() => { // Timeout is so that message dissapears. 
                 setErrorMessage(null);
             }, 3000);
         }
@@ -184,18 +185,32 @@ export default function DashboardPage() {
     };
 
 
-    return (
+
+
+
+
+
+/////////////////// RETURN STATEMENT GIVES VISUAL COMPONENT OF THE PAGE /////////////
+///////////////////THIS IS THE START OF THE UI YOUR PAGE WILL DISPLAY////////////////////////
+//////Everything inside the Div will be shown on the screen ///////
+
+
+
+
+
+    return ( 
         <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}>
             <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
             {/* ----- Display Success Message ----- */}
             {successMessage && (
-                <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
+                <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md"> {/* Defined outisde to be Table to put it on top*/}
                     <strong>{successMessage}</strong>
                 </div>
             )}
 
-            {/* ----- Ingredients Table ----- */}
+            {/*After your title and success message, you now display a big ingredients table.*/}
+            {/* ----- Ingredients Table ----- */} 
             <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
                 <Table className="border-collapse">
                     <TableHeader>
@@ -203,37 +218,36 @@ export default function DashboardPage() {
                             <TableHead className="w-[100px]">Name</TableHead>
                             <TableHead>Default Cooking style</TableHead>
                             <TableHead>Default Size</TableHead>
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Edit */}
+                            <TableHead className="w-[50px] text-center"></TableHead> {/* Header row with column titles: Name, Cooking style, Size, and an empty one (for the delete button). */}
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        {ingredients.map((ingredient) => (
+                    <TableBody> {/* Every other row is defined here */}
+                        {/* Specifies that everthing thats gonna be in this table is gonna be a separate ingredient. */}
+                        {ingredients.map((ingredient) => (  
                             <TableRow 
-                                key={ingredient["ingredients-id"]} 
-                                onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
+                                key={ingredient["ingredients-id"]}  {/* Saves eveyhting from that ingredient. If click here can see it in dialog box */}
+                                onClick={() => setSelectedIngredient(ingredient)} {/* Trigger edit on row click */}
                                 className="cursor-pointer"
                             >
-                                <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell>
+                                <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell> {/* Show the ingedient data */}
                                 <TableCell>{ingredient.default_cooking_type}</TableCell>
                                 <TableCell>{ingredient.default_portion_size}</TableCell>
                                 <TableCell className="text-center">
-                                    <div onClick={(e) => e.stopPropagation()}>
+                                    <div onClick={(e) => e.stopPropagation()}> {/* This stops the click from also selecting the row when you click the delete button. */}
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button 
+                                                <Button {/* Define button as triger */}
                                                 onClick={(e) => e.stopPropagation()} 
                                                 className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
                                                     {/* Trash icon inside the button */}
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-4 h-4" /> {/* visual element (trash can) */}
                                                 </Button>
                                             </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                {errorMessage && (
-                                                    <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>
-                                                )}
+                                            <AlertDialogContent> 
+                                                {errorMessage && ( {/* Conditional module, when error message is true */}
+                                                    <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div> )}
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle> 
                                                     <AlertDialogDescription>
                                                         This action cannot be undone. It will permanently delete this ingredient.
                                                     </AlertDialogDescription>
@@ -252,7 +266,7 @@ export default function DashboardPage() {
                 </Table>
             </div>
 
-            
+            {/* Create Edit Form */}
             {selectedIngredient && (
                 <AlertDialog open={!!selectedIngredient} onOpenChange={() => setSelectedIngredient(null)}>
                     <AlertDialogContent className="max-w-lg">
@@ -282,7 +296,7 @@ export default function DashboardPage() {
                     )}
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            {/* Ingredient Name */}
+                            {/* Ingredient Name - How it should look */}
                             <FormField control={form.control} name="ingredient_name" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Ingredient Name</FormLabel>
@@ -293,13 +307,13 @@ export default function DashboardPage() {
                                 </FormItem>
                             )} />
 
-                            {/* Cooking Type */}
+                            {/* Cooking Type - A bit more complex since we have a dropdown*/}
                             <FormField control={form.control} name="default_cooking_type" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Default Cooking Type</FormLabel>
                                     <FormControl>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
+                                        <DropdownMenu> {/* One of the Components we have */}
+                                            <DropdownMenuTrigger asChild> 
                                                 <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
                                                     {field.value || "Select Cooking Type"}
                                                 </div>
