@@ -14,54 +14,57 @@ def handler(event, context):
     food_record_id = str(uuid.uuid4())
     event_body = json.loads(event['body'])
     logger.info(event)
+    inserted_records = []
 
     dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
-
-    try:
-        item = {
-            "food-record-id": {
-                "S": food_record_id
-            },
-            "record_date": {
-                "S": event_body["record_date"]
-            },
-            "ingredient_id": {
-                "S": event_body["ingredient_id"]
-            },
-            "ingredient_name": {
-                "S": event_body["ingredient_name"]
-            },
-            "portion_size": {
-                "S": event_body["portion_size"]
-            },
-            "cooking_type": {
-                "S": event_body["cooking_type"]
-            },
-            "time_of_day": {
-                "S": event_body["time_of_day"]
+    for food_record in event_body:
+        food_record_id = str(uuid.uuid4())
+        try:
+            item = {
+                "food-record-id": {
+                    "S": food_record_id
+                },
+                "record_date": {
+                    "S": food_record["record_date"]
+                },
+                "ingredient_id": {
+                    "S": food_record["ingredient_id"]
+                },
+                "ingredient_name": {
+                    "S": food_record["ingredient_name"]
+                },
+                "portion_size": {
+                    "S": food_record["portion_size"]
+                },
+                "cooking_type": {
+                    "S": food_record["cooking_type"]
+                },
+                "time_of_day": {
+                    "S": food_record["time_of_day"]
+                }
             }
-        }
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': f"Internal error occurred - {e}"
-        }
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': f"Internal error occurred - {e}"
+            }
 
-    try:
-        dynamodb.put_item(TableName='food_records', Item=item)
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': f"Unexpected error while inserting item - {e}"
-        }
+        try:
+            dynamodb.put_item(TableName='food_records', Item=item)
+            inserted_records.append(food_record_id)
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': f"Unexpected error while inserting item - {e}"
+            }
 
     return {
         'statusCode': 200,
@@ -69,5 +72,5 @@ def handler(event, context):
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         },
-        'body': json.dumps({'food_record_id': food_record_id})
+        'body': json.dumps({'inserted_records': inserted_records})
     }
