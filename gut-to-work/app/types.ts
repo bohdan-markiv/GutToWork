@@ -6,7 +6,7 @@ export type Ingredient = {
   default_portion_size: string;
 };
 
-export type Ingredients = Ingredient[]; // or Array<Ingredient>
+export type Ingredients = Ingredient[]; 
 
 export type EditFormProps = {
     ingredient: Ingredient;
@@ -16,11 +16,14 @@ export type EditFormProps = {
     errorMessage: string | null;
 };
 
-export type Food = {
-  record_date : Date
+export type FoodRecord = {
+  ingredient_id: string;
   ingredient_name: string;
-  cooking_type: string;
-  "ingredients-id": string;
-  portion_size: string;
-  
-}
+  portion_size: string; 
+  time_of_day: string; 
+  record_date: string; 
+  "food-record-id": string;
+  cooking_type: string; 
+};
+
+export type FoodRecords = FoodRecord[];

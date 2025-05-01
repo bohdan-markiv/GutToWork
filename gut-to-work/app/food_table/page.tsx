@@ -17,7 +17,7 @@ import {
     TableHeader,
     TableRow,
 } from "../components/Table";
-import { Ingredient, Ingredients } from "../types";
+import { Ingredient, Ingredients, FoodRecord, FoodRecords  } from "../types";
 
 import {
     Form,
@@ -59,6 +59,39 @@ export default function DashboardPage() {
     const [open, setOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [foodRecords, setFoodRecords] = useState<FoodRecords>([]);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records"
+        );
+        setFoodRecords(response.data);
+      } catch (error) {
+        console.error("Failed to fetch food records", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const groupedRecords = foodRecords.reduce((acc, record) => {
+    const date = record.record_date;
+    const timeOfDay = record.time_of_day;
+  
+    if (!acc[date]) {
+      acc[date] = {};
+    }
+  
+    if (!acc[date][timeOfDay]) {
+      acc[date][timeOfDay] = [];
+    }
+  
+    acc[date][timeOfDay].push(record);
+  
+    return acc;
+  }, {});
 
     return (
         <div 
@@ -67,29 +100,56 @@ export default function DashboardPage() {
       >
             <h1 className="text-4xl font-bold mb-4">Food Records</h1>
 
-            {/* ----- Ingredients Table ----- */}
+            {/* ----- Food Table ----- */}
             <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
-                <Table className="border-collapse">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Date</TableHead>
-                            <TableHead>Ingredients</TableHead>
-                            <TableHead>Time of Day</TableHead>
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                            <TableRow 
-                            >
-                                <TableCell className="font-medium">datet</TableCell>
-                                <TableCell>time of day</TableCell>
-                                <TableCell>ingredients</TableCell>
-                                <TableCell className="text-center">
-                                </TableCell>
-                            </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
+            <Table className="border-collapse">
+  <TableHeader>
+    <TableRow>
+      <TableHead>Date</TableHead>
+      <TableHead>Ingredient</TableHead>
+      <TableHead>Cooking Type</TableHead>
+      <TableHead>Portion Size</TableHead>
+      <TableHead className="w-[50px] text-center"></TableHead> {/* Edit/Delete */}
+    </TableRow>
+  </TableHeader>
+<TableBody>
+  {Object.entries(groupedRecords)
+    .sort(([a], [b]) => new Date(a) - new Date(b)) // Sort by date
+    .map(([date, timeGroups]) => (
+      Object.entries(timeGroups)
+        .sort(([a], [b]) => a.localeCompare(b)) // Optional: sort time of day (e.g., morning, afternoon)
+        .map(([timeOfDay, records], timeIndex) =>
+          records.map((record, index) => (
+            <TableRow key={`${record["foodRecord-id"]}-${index}`}>
+              {index === 0 && timeIndex === 0 && (
+                <TableCell
+                  rowSpan={Object.values(timeGroups).flat().length}
+                  className="align-top font-bold"
+                >
+                  {date}
+                </TableCell>
+              )}
+              {index === 0 && (
+                <TableCell
+                  rowSpan={records.length}
+                  className="align-top font-semibold italic"
+                >
+                  {timeOfDay}
+                </TableCell>
+              )}
+              <TableCell>{record.ingredient_name}</TableCell>
+              <TableCell>{record.cooking_type}</TableCell>
+              <TableCell>{record.portion_size}</TableCell>
+              <TableCell className="text-center">
+                {/* Optional: edit/delete buttons */}
+              </TableCell>
+            </TableRow>
+          ))
+        )
+    ))}
+</TableBody>
+</Table>
+</div>
         </div>
     );
 }
