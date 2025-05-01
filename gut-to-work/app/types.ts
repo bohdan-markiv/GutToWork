@@ -16,3 +16,11 @@ export type EditFormProps = {
     errorMessage: string | null;
 };
 
+export type Food = {
+  record_date : Date
+  ingredient_name: string;
+  cooking_type: string;
+  "ingredients-id": string;
+  portion_size: string;
+  
+}
