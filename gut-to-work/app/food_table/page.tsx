@@ -101,6 +101,18 @@ export default function DashboardPage() {
     },
   });
 
+// make sure form is clear when opened
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        ingredient_name: "",
+        default_cooking_type: "",
+        default_size: "",
+        ingredients: [],
+      });
+    }
+  }, [open, form]);
+
   const onSubmit = (data: FormData) => {
     console.log("Form Submitted with data:", data);
   };
@@ -207,7 +219,7 @@ export default function DashboardPage() {
                     Cancel
                   </Button>
                 </AlertDialogCancel>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">Next</Button>
               </div>
             </form>
           </Form>

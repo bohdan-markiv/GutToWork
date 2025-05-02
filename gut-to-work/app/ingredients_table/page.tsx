@@ -93,6 +93,16 @@ export default function DashboardPage() {
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        ingredient_name: "",
+        default_cooking_type: "",
+        default_size: "",
+      });
+    }
+  }, [open, form]);
+
   // ----- Handle Form Submission -----
   const onSubmit = async (data: FormData) => {
     try {
