@@ -91,18 +91,18 @@ const IngredientDropdown = ({ control, name, label }: IngredientDropdownProps) =
                 placeholder="Type to add ingredients..."
               />
               {suggestions.length > 0 && (
-  <div className="mt-1 border border-gray-300 rounded shadow-sm bg-white max-h-40 overflow-y-auto">
-    {suggestions.map((sug) => (
-      <div
-        key={sug["ingredients-id"]}
-        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-        onClick={() => addIngredient(sug.ingredient_name)}
-      >
-        {sug.ingredient_name}
-      </div>
-    ))}
-  </div>
-)}
+                <div className="mt-1 border border-gray-300 rounded shadow-sm bg-white max-h-40 overflow-y-auto">
+                  {suggestions.map((sug) => (
+                    <div
+                      key={sug["ingredients-id"]}
+                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => addIngredient(sug.ingredient_name)}
+                    >
+                      {sug.ingredient_name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         }}

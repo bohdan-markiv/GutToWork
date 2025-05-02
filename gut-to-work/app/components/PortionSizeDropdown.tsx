@@ -9,16 +9,13 @@ import {
   DropdownMenuSeparator,
 } from "./DropdownMenu"; // Adjust path as needed
 
-const cookingOptions = [
-  "raw",
-  "boiled",
-  "deep fried",
-  "pan fried",
-  "baked",
-  "infused",
+const portionSizes = [
+  "small",
+  "normal",
+  "big",
 ];
 
-const CookingTypeDropdown = ({ field }: { field: any }) => {
+const PortionSizeDropdown = ({ field }: { field: any }) => {
   const [selectedType, setSelectedType] = useState<string>(field.value || "");
 
   useEffect(() => {
@@ -34,12 +31,12 @@ const CookingTypeDropdown = ({ field }: { field: any }) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-          {selectedType ? selectedType : "Select Cooking Type"}
+          {selectedType ? selectedType : "Select Portion Size"}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuSeparator />
-        {cookingOptions.map((type) => (
+        {portionSizes.map((type) => (
           <DropdownMenuItem
             key={type}
             onClick={() => handleSelection(type)}
@@ -53,4 +50,4 @@ const CookingTypeDropdown = ({ field }: { field: any }) => {
   );
 };
 
-export default CookingTypeDropdown;
+export default PortionSizeDropdown;
