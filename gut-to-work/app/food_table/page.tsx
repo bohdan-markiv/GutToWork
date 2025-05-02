@@ -36,7 +36,11 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuCheckboxItem,
 } from "../components/DropdownMenu";
+
+import CookingTypeDropdown from "../components/CookingTypeDropdown";
+import IngredientDropdown from "../components/IngredientDropdown";
 
 import { Input } from "../components/Input";
 import {
@@ -53,12 +57,21 @@ import {
 
 import { EditForm } from "../components/EditForm";
 
+import { groupFoodRecords } from "./functions"; 
+
+const formSchema = z.object({
+  ingredient_name: z.string().nonempty("Ingredient name is required"),
+  default_cooking_type: z.string().nonempty("Default cooking type is required"),
+  default_size: z.string().nonempty("Default size is required"),
+  
+});
+
+type FormData = z.infer<typeof formSchema>;
+
 export default function DashboardPage() {
     const [ingredients, setIngredients] = useState<Ingredients>([]);
     const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
     const [open, setOpen] = useState(false);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [foodRecords, setFoodRecords] = useState<FoodRecords>([]);
 
 
@@ -76,22 +89,21 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  const groupedRecords = foodRecords.reduce((acc, record) => {
-    const date = record.record_date;
-    const timeOfDay = record.time_of_day;
-  
-    if (!acc[date]) {
-      acc[date] = {};
-    }
-  
-    if (!acc[date][timeOfDay]) {
-      acc[date][timeOfDay] = [];
-    }
-  
-    acc[date][timeOfDay].push(record);
-  
-    return acc;
-  }, {});
+  const groupedRecords = groupFoodRecords(foodRecords);
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      ingredient_name: "",
+      default_cooking_type: "",
+      default_size: "",
+      ingredients: [],
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    console.log("Form Submitted with data:", data);
+  };
 
     return (
         <div 
@@ -150,6 +162,58 @@ export default function DashboardPage() {
 </TableBody>
 </Table>
 </div>
+
+<AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogTrigger asChild>
+          <Button className="mt-4 hover:!bg-gray-500">Create Ingredient</Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogTitle>Create ingredient</AlertDialogTitle>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Ingredient Name */}
+              <FormField
+  control={form.control}
+  name="ingredients"
+  render={() => (
+    <FormItem>
+      <FormLabel>Select Ingredients</FormLabel>
+      <FormControl>
+        <IngredientDropdown control={form.control} name="ingredients" />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+              {/* Cooking Type */}
+              <FormField
+                control={form.control}
+                name="default_cooking_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>cooking type </FormLabel>
+                    <FormControl>
+                      <CookingTypeDropdown field={field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex items-center justify-end space-x-4">
+                <AlertDialogCancel asChild>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                </AlertDialogCancel>
+                <Button type="submit">Submit</Button>
+              </div>
+            </form>
+          </Form>
+        </AlertDialogContent>
+      </AlertDialog>
+
         </div>
     );
-}
+  }
