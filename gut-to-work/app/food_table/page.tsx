@@ -89,17 +89,17 @@ export default function DashboardPage() {
 
   const groupedRecords = groupFoodRecords(foodRecords);
 
-  // Make sure form is clear when opened
+  // Clear dependent fields when ingredients are deselected
   useEffect(() => {
-    if (open) {
-      form.reset({
-        ingredient_name: "",
-        default_cooking_type: "",
-        default_size: "",
-        ingredients: [],
-      });
-    }
-  }, [open, form]);
+    const deselectedIngredients = Object.keys(form.getValues("portionSizes")).filter(
+      (id) => !selectedIngredients.includes(id)
+    );
+
+    // Reset portionSizes for deselected ingredients
+    deselectedIngredients.forEach((id) => {
+      form.setValue(`portionSizes.${id}`, undefined); // Clear the dependent fields
+    });
+  }, [selectedIngredients, form]);
 
   const onSubmit = (data: FormData) => {
     console.log("Form Submitted with data:", data);
@@ -199,19 +199,19 @@ export default function DashboardPage() {
                     />
 
                     {/* Portion Size */}
-      <FormField
-        control={form.control}
-        name={`portionSizes.${id}.portionSize`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Portion Size</FormLabel>
-            <FormControl>
-              <PortionSizeDropdown field={field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+                    <FormField
+                      control={form.control}
+                      name={`portionSizes.${id}.portionSize`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Portion Size</FormLabel>
+                          <FormControl>
+                            <PortionSizeDropdown field={field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 );
               })}
