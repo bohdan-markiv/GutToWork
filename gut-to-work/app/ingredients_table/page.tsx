@@ -202,12 +202,14 @@ export default function DashboardPage() {  // Creating a page component. This de
 
 
     return ( 
-        <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}>
+        <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}
+        >
             <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
             {/* ----- Display Success Message ----- */}
             {successMessage && (
-                <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md"> {/* Defined outisde to be Table to put it on top*/}
+                <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md"> 
+                    {/* Defined outisde to be Table to put it on top*/}
                     <strong>{successMessage}</strong>
                 </div>
             )}
@@ -227,9 +229,10 @@ export default function DashboardPage() {  // Creating a page component. This de
                     <TableBody> {/* Every other row is defined here */}
                         {/* Specifies that everthing thats gonna be in this table is gonna be a separate ingredient. */}
                         {ingredients.map((ingredient) => (  
+                            
                             <TableRow 
-                                key={ingredient["ingredients-id"]}  {/* Saves eveyhting from that ingredient. If click here can see it in dialog box */}
-                                onClick={() => setSelectedIngredient(ingredient)} {/* Trigger edit on row click */}
+                                key={ingredient["ingredients-id"]}  //Saves eveyhting from that ingredient. If click here can see it in dialog box 
+                                onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
                                 className="cursor-pointer"
                             >
                                 <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell> {/* Show the ingedient data */}
@@ -239,7 +242,7 @@ export default function DashboardPage() {  // Creating a page component. This de
                                     <div onClick={(e) => e.stopPropagation()}> {/* This stops the click from also selecting the row when you click the delete button. */}
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button {/* Define button as triger */}
+                                                <Button // Define button as triger
                                                 onClick={(e) => e.stopPropagation()} 
                                                 className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
                                                     {/* Trash icon inside the button */}
@@ -247,7 +250,7 @@ export default function DashboardPage() {  // Creating a page component. This de
                                                 </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent> 
-                                                {errorMessage && ( {/* Conditional module, when error message is true */}
+                                                {errorMessage && ( // Conditional module, when error message is true
                                                     <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div> )}
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle> 
