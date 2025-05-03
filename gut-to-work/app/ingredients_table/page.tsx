@@ -20,41 +20,36 @@ import { // This can be seen in ui.shadcn.com as seen in this link https://ui.sh
 import { Ingredient } from "../types";  // Defined in Types.ts
 
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "../components/Form";
 
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "../components/DropdownMenu";
 
 import { Input } from "../components/Input";
 import {
-    AlertDialog,
-    AlertDialogTrigger,
-    AlertDialogContent,
-    AlertDialogCancel,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogAction,
-    AlertDialogDescription,
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogAction,
+  AlertDialogDescription,
 } from "../components/AlertDialog";
 
 import { EditForm } from "../components/EditForm";
-
-
-
 
 // ----- Zod Schema for Ingredient Form -----  "Look at the schema I made and generate a TypeScript type that matches it."
 const formSchema = z.object({
@@ -155,8 +150,7 @@ export default function DashboardPage() {  // Creating a page component. This de
         }
     };
 
-    // ----- Handle Ingredient Edit ----- 
-    
+  // ----- Handle Ingredient Edit -----
 
     const handleEditSubmit = async (updatedIngredient: Ingredient) => {
         try {
@@ -201,10 +195,12 @@ export default function DashboardPage() {  // Creating a page component. This de
 
 
 
-    return ( 
-        <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}
-        >
-            <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
+  return (
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-8"
+      style={{ backgroundColor: "white", color: "var(--primary)" }}
+    >
+      <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
             {/* ----- Display Success Message ----- */}
             {successMessage && (
@@ -341,42 +337,50 @@ export default function DashboardPage() {  // Creating a page component. This de
                                 </FormItem>
                             )} />
 
-                            {/* Default Size */}
-                            <FormField control={form.control} name="default_size" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Default Size</FormLabel>
-                                    <FormControl>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                                                    {field.value || "Select Portion Size"}
-                                                </div>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                <DropdownMenuSeparator />
-                                                {["small", "normal", "big"].map((type) => (
-                                                    <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
-                                                        {type}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
+              {/* Default Size */}
+              <FormField
+                control={form.control}
+                name="default_size"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Default Size</FormLabel>
+                    <FormControl>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                            {field.value || "Select Portion Size"}
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuSeparator />
+                          {["small", "normal", "big"].map((type) => (
+                            <DropdownMenuItem
+                              key={type}
+                              onSelect={() => field.onChange(type)}
+                            >
+                              {type}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                            <div className="flex items-center justify-end space-x-4">
-                                <AlertDialogCancel asChild>
-                                    <Button variant="outline" type="button">Cancel</Button>
-                                </AlertDialogCancel>
-                                <Button type="submit">Submit</Button>
-                            </div>
-                        </form>
-                    </Form>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
-    );
+              <div className="flex items-center justify-end space-x-4">
+                <AlertDialogCancel asChild>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                </AlertDialogCancel>
+                <Button type="submit">Submit</Button>
+              </div>
+            </form>
+          </Form>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 }
-
