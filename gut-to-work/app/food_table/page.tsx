@@ -115,6 +115,7 @@ export default function DashboardPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
+              <TableHead>Time of Day</TableHead>
               <TableHead>Ingredient</TableHead>
               <TableHead>Cooking Type</TableHead>
               <TableHead>Portion Size</TableHead>
