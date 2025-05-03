@@ -18,6 +18,14 @@ import CookingTypeDropdown from "../components/CookingTypeDropdown";
 import PortionSizeDropdown from "../components/PortionSizeDropdown";
 
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/DropdownMenu";
+
+import {
   AlertDialog,
   AlertDialogTrigger,
   AlertDialogContent,
@@ -30,11 +38,20 @@ import {
 import { groupFoodRecords } from "./functions";
 
 const formSchema = z.object({
+  date: z.date({
+    required_error: "Date is required",
+    invalid_type_error: "Invalid date",
+  }),
   ingredient_name: z.string().nonempty("Ingredient name is required"),
   default_cooking_type: z.string().nonempty("Default cooking type is required"),
   default_size: z.string().nonempty("Default size is required"),
   ingredients: z.array(z.string()),
-  portionSizes: z.record(z.string()),
+  ingredients_info: z.record(
+    z.object({
+      cookingType: z.string().nonempty("Cooking type is required"),
+      portionSize: z.string().nonempty("Portion size is required"),
+    })
+  ),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -47,11 +64,12 @@ export default function DashboardPage() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      date: undefined,
       ingredient_name: "",
       default_cooking_type: "",
       default_size: "",
       ingredients: [],
-      portionSizes: [],
+      ingredients_info: {},
     },
   });
 
@@ -91,13 +109,13 @@ export default function DashboardPage() {
 
   // Clear dependent fields when ingredients are deselected
   useEffect(() => {
-    const deselectedIngredients = Object.keys(form.getValues("portionSizes")).filter(
+    const deselectedIngredients = Object.keys(form.getValues("ingredients_info")).filter(
       (id) => !selectedIngredients.includes(id)
     );
-
-    // Reset portionSizes for deselected ingredients
+  
+    // Reset ingredients_info for deselected ingredients
     deselectedIngredients.forEach((id) => {
-      form.setValue(`portionSizes.${id}`, undefined); // Clear the dependent fields
+      form.setValue(`ingredients_info.${id}`, { cookingType: "", portionSize: "" }); // Reset to default object
     });
   }, [selectedIngredients, form]);
 
@@ -159,10 +177,55 @@ export default function DashboardPage() {
         <AlertDialogTrigger asChild>
           <Button className="mt-4 hover:!bg-gray-500">Create Ingredient</Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-h-screen overflow-y-auto">
           <AlertDialogTitle>Create ingredient</AlertDialogTitle>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+  control={form.control}
+  name="date"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Date</FormLabel>
+      <FormControl>
+                                    <Input type="date" {...field} />
+                                </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="time_of_day"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Time of Day</FormLabel>
+      <FormControl>
+      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                            {field.value || "Select Time of Day"}
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuSeparator />
+                          {["morning", "afternoon", "evening"].map((type) => (
+                            <DropdownMenuItem
+                              key={type}
+                              onSelect={() => field.onChange(type)}
+                            >
+                              {type}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                                </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
               {/* Ingredient Name */}
               <FormField
                 control={form.control}
@@ -178,8 +241,12 @@ export default function DashboardPage() {
                 )}
               />
 
-              {selectedIngredients.map((id: string) => {
-                const ingredient = ingredients.find((i) => i["ingredients-id"] === id);
+{selectedIngredients.map((id: string) => {
+  const ingredient = ingredients.find((i) => i["ingredients-id"] === id);
+
+  const ingredientInfo = form.getValues(`ingredients_info.${id}`); // Get the ingredient info
+  const cookingType = ingredientInfo ? ingredientInfo.cookingType : "";
+  const portionSize = ingredientInfo ? ingredientInfo.portionSize : "";
 
                 return (
                   <div key={id} className="border p-4 rounded mb-2">
@@ -187,7 +254,7 @@ export default function DashboardPage() {
 
                     <FormField
                       control={form.control}
-                      name={`portionSizes.${id}`}
+                      name={`ingredients_info.${id}.cookingType`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Cooking type for {ingredient ? ingredient.ingredient_name : "Unknown Ingredient"}</FormLabel>
@@ -202,10 +269,10 @@ export default function DashboardPage() {
                     {/* Portion Size */}
                     <FormField
                       control={form.control}
-                      name={`portionSizes.${id}.portionSize`}
+                      name={`ingredients_info.${id}.portionSize`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Portion Size</FormLabel>
+                          <FormLabel>Portion Size for {ingredient ? ingredient.ingredient_name : "Unknown Ingredient"} </FormLabel>
                           <FormControl>
                             <PortionSizeDropdown field={field} />
                           </FormControl>
