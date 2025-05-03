@@ -836,14 +836,10 @@ components:
     FoodRecord:
       type: object
       required:
-        - food_record_id
         - record_date
         - time_of_day
         - ingredients
       properties:
-        food_record_id:
-          type: string
-          example: fdsanhujvdjfvnbsajdf
         record_date:
           type: string
           format: date
