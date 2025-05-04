@@ -8,8 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Trash2 } from "lucide-react";
 
-///import { Slider } from "../components/Slider";
-///<Slider defaultValue={[33]} max={100} step={1} />
+import { Slider } from "../components/Slider";
+<Slider defaultValue={[33]} max={100} step={1} />
 
 import { Button } from "../components/Button";
 import { // This can be seen in ui.shadcn.com as seen in this link https://ui.shadcn.com/docs/components/table
@@ -325,13 +325,21 @@ return (
                             name="feeling_score"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Feeling Score (1–10)</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" min={1} max={10} placeholder="e.g. 7" {...field} />
-                                    </FormControl>
+                                <FormLabel>Feeling Score (1–10)</FormLabel>
+                                <FormControl>
+                                    <Slider
+                                    defaultValue={[field.value ?? 5]}
+                                    min={1}
+                                    max={10}
+                                    step={1}
+                                    onValueChange={(val: number[]) => field.onChange(val[0])}
+                                    />
+                                </FormControl>
                                 <FormMessage />
                                 </FormItem>
-                            )}/>
+                            )}
+                            />
+
 
                             {/* Stress Level */}
                             <FormField
@@ -341,12 +349,19 @@ return (
                                 <FormItem>
                                 <FormLabel>Stress Level (1–10)</FormLabel>
                                 <FormControl>
-                                    <Input type="number" min={1} max={10} placeholder="e.g. 4" {...field} />
+                                    <Slider
+                                    defaultValue={[field.value ?? 5]}
+                                    min={1}
+                                    max={10}
+                                    step={1}
+                                    onValueChange={(val: number[]) => field.onChange(val[0])}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
                             )}
                             />
+
 
                             {/* Date */}
                             <FormField
