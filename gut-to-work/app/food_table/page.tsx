@@ -38,13 +38,8 @@ import {
 import { groupFoodRecords } from "./functions";
 
 const formSchema = z.object({
-  date: z.date({
-    required_error: "Date is required",
-    invalid_type_error: "Invalid date",
-  }),
-  ingredient_name: z.string().nonempty("Ingredient name is required"),
-  default_cooking_type: z.string().nonempty("Default cooking type is required"),
-  default_size: z.string().nonempty("Default size is required"),
+  date: z.string({ required_error: "Date is required" }),
+  time_of_day: z.string({required_error: "Time of day is required"}),
   ingredients: z.array(z.string()),
   ingredients_info: z.record(
     z.object({
@@ -53,24 +48,28 @@ const formSchema = z.object({
     })
   ),
 });
-
 type FormData = z.infer<typeof formSchema>;
 
 export default function DashboardPage() {
-  const [ingredients, setIngredients] = useState<Ingredients>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  useEffect(() => {
+    fetch("https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients")
+      .then((res) => res.json())
+      .then(setIngredients)
+      .catch(console.error);
+  }, []);
+
   const [foodRecords, setFoodRecords] = useState<FoodRecords>([]);
   const [open, setOpen] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      date: undefined,
-      ingredient_name: "",
-      default_cooking_type: "",
-      default_size: "",
+      date: "",
+      time_of_day: "",
       ingredients: [],
       ingredients_info: {},
-    },
+    }
   });
 
   const selectedIngredients = form.watch("ingredients") || [];
@@ -119,9 +118,47 @@ export default function DashboardPage() {
     });
   }, [selectedIngredients, form]);
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form Submitted with data:", data);
+  const onSubmit = async (data: FormData) => {
+    try {
+      // Prepare the payload for the POST request
+      const payload = {
+        record_date: data.date, // Use record_date instead of date
+        time_of_day: data.time_of_day,
+        ingredients: data.ingredients.map((ingredientId) => {
+          const ingredientInfo = data.ingredients_info[ingredientId];
+          const ingredient = ingredients.find((i) => i["ingredients-id"] === ingredientId);
+  
+          return {
+            ingredient_id: ingredientId,
+            ingredient_name: ingredient?.ingredient_name || "",  // Make sure ingredient_name exists
+            cooking_type: ingredientInfo?.cookingType || "", // Ensure cooking_type is defined
+            portion_size: ingredientInfo?.portionSize || "", // Ensure portion_size is defined
+          };
+        }),
+      };
+  
+      // Log the payload to verify the format before sending it
+      console.log("Payload being sent:", payload);
+  
+      // Make the POST request
+      const response = await axios.post(
+        "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records",
+        payload,
+      );
+  
+      console.log("Food Record Created:", response.data);
+  
+      // Optionally, update the food records state or perform other actions on success
+      setFoodRecords((prev) => [...prev, response.data]);
+  
+      // Reset the form and close the dialog
+      form.reset();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to create food record", error);
+    }
   };
+  
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}>
@@ -181,36 +218,40 @@ export default function DashboardPage() {
           <AlertDialogTitle>Create ingredient</AlertDialogTitle>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-  control={form.control}
-  name="date"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Date</FormLabel>
-      <FormControl>
-                                    <Input type="date" {...field} />
-                                </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
-<FormField
-  control={form.control}
-  name="time_of_day"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Time of Day</FormLabel>
-      <FormControl>
-      <DropdownMenu>
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="time_of_day"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                            {field.value || "Select Time of Day"}
+                            {field.value || "Select time of day"}
                           </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuSeparator />
-                          {["morning", "afternoon", "evening"].map((type) => (
+                          {[
+                            "morning",
+                            "afternoon",
+                            "evening",
+                            "night",
+                          ].map((type) => (
                             <DropdownMenuItem
                               key={type}
                               onSelect={() => field.onChange(type)}
@@ -220,13 +261,13 @@ export default function DashboardPage() {
                           ))}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                                </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              {/* Ingredient Name */}
+              {/* Ingredient Dropdown */}
               <FormField
                 control={form.control}
                 name="ingredients"
@@ -234,45 +275,71 @@ export default function DashboardPage() {
                   <FormItem>
                     <FormLabel>Select Ingredients</FormLabel>
                     <FormControl>
-                      <IngredientDropdown control={form.control} name="ingredients" />
+                      <IngredientDropdown
+                        control={form.control}
+                        name="ingredients"
+                        ingredients={ingredients}
+                        onAddIngredient={(id) => console.log("Ingredient added:", id)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-{selectedIngredients.map((id: string) => {
-  const ingredient = ingredients.find((i) => i["ingredients-id"] === id);
-
-  const ingredientInfo = form.getValues(`ingredients_info.${id}`); // Get the ingredient info
-  const cookingType = ingredientInfo ? ingredientInfo.cookingType : "";
-  const portionSize = ingredientInfo ? ingredientInfo.portionSize : "";
-
+              {/* Ingredient Info */}
+              {form.watch("ingredients")?.map((id: string) => {
+                const ingredient = ingredients.find((i) => i["ingredients-id"] === id);
                 return (
                   <div key={id} className="border p-4 rounded mb-2">
-                    <h4 className="font-semibold mb-2">{ingredient ? ingredient.ingredient_name : "Ingredient not found"}</h4>
-
+                    <h4 className="font-semibold mb-2">
+                      {ingredient ? ingredient.ingredient_name : "Ingredient not found"}
+                    </h4>
                     <FormField
                       control={form.control}
                       name={`ingredients_info.${id}.cookingType`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Cooking type for {ingredient ? ingredient.ingredient_name : "Unknown Ingredient"}</FormLabel>
+                          <FormLabel>Cooking type for {ingredient?.ingredient_name}</FormLabel>
                           <FormControl>
-                            <CookingTypeDropdown field={field} />
+                            {/* Directly insert the dropdown logic here */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                                  {field.value || "Select Cooking Type"}
+                                </div>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                              <DropdownMenuSeparator />
+                          {[
+                            "raw",
+                            "boiled",
+                            "deep fried",
+                            "pan fried",
+                            "baked",
+                            "infused",
+                          ].map((type) => (
+                            <DropdownMenuItem
+                              key={type}
+                              onSelect={() => field.onChange(type)}
+                            >
+                              {type}
+                            </DropdownMenuItem>
+                          ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    {/* Portion Size */}
                     <FormField
                       control={form.control}
                       name={`ingredients_info.${id}.portionSize`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Portion Size for {ingredient ? ingredient.ingredient_name : "Unknown Ingredient"} </FormLabel>
+                          <FormLabel>Portion Size for {ingredient?.ingredient_name}</FormLabel>
                           <FormControl>
                             <PortionSizeDropdown field={field} />
                           </FormControl>
@@ -290,7 +357,7 @@ export default function DashboardPage() {
                     Cancel
                   </Button>
                 </AlertDialogCancel>
-                <Button type="submit">Next</Button>
+                <Button type="submit">Submit</Button>
               </div>
             </form>
           </Form>

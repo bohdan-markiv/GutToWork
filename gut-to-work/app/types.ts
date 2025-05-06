@@ -15,15 +15,17 @@ export type EditFormProps = {
     successMessage: string | null;
     errorMessage: string | null;
 };
-
-export type FoodRecord = {
+export type FoodRecordIngredient = { 
   ingredient_id: string;
   ingredient_name: string;
-  portion_size: string; 
+  portion_size: string;
+  cooking_type: string;
+}
+export type FoodRecord = {
   time_of_day: string; 
   record_date: string; 
   "food-record-id": string;
-  cooking_type: string; 
+  ingredients:  FoodRecordIngredient[];
 };
 
 export type FoodRecords = FoodRecord[];

@@ -1,33 +1,32 @@
-import { useEffect, useState } from "react";
+// IngredientDropdown.tsx
 import { Controller } from "react-hook-form";
 import { Ingredient } from "../types";
+import { useState } from "react";
 
 interface IngredientDropdownProps {
   control: any;
   name: string;
   label?: string;
+  ingredients: Ingredient[];
+  onAddIngredient?: (id: string) => void;
 }
 
-const IngredientDropdown = ({ control, name, label }: IngredientDropdownProps) => {
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [loading, setLoading] = useState(true);
+const IngredientDropdown = ({
+  control,
+  name,
+  label,
+  ingredients,
+  onAddIngredient,
+}: IngredientDropdownProps) => {
   const [inputValue, setInputValue] = useState("");
-
-  useEffect(() => {
-    fetch("https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients")
-      .then((res) => res.json())
-      .then(setIngredients)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
 
   const getIngredientById = (id: string) =>
     ingredients.find((ing) => ing["ingredients-id"] === id);
 
   const getIngredientByName = (name: string) =>
-    ingredients.find((ing) => ing.ingredient_name.toLowerCase() === name.toLowerCase());
-
-  if (loading) return <p>Loading ingredients...</p>;
+    ingredients.find(
+      (ing) => ing.ingredient_name.toLowerCase() === name.toLowerCase()
+    );
 
   return (
     <div className="mb-4">
@@ -42,6 +41,7 @@ const IngredientDropdown = ({ control, name, label }: IngredientDropdownProps) =
             const match = getIngredientByName(name);
             if (match && !selectedIds.includes(match["ingredients-id"])) {
               field.onChange([...selectedIds, match["ingredients-id"]]);
+              onAddIngredient?.(match["ingredients-id"]);
             }
             setInputValue("");
           };
@@ -52,7 +52,10 @@ const IngredientDropdown = ({ control, name, label }: IngredientDropdownProps) =
 
           const suggestions = ingredients.filter(
             (ing) =>
-              (!inputValue || ing.ingredient_name.toLowerCase().includes(inputValue.toLowerCase())) &&
+              (!inputValue ||
+                ing.ingredient_name
+                  .toLowerCase()
+                  .includes(inputValue.toLowerCase())) &&
               !selectedIds.includes(ing["ingredients-id"])
           );
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -19,22 +17,27 @@ const cookingOptions = [
 ];
 
 const CookingTypeDropdown = ({ field }: { field: any }) => {
+  // Initialize state to the field value (if available) or the default placeholder value
   const [selectedType, setSelectedType] = useState<string>(field.value || "");
 
+  // Sync selectedType when field.value changes, to ensure correct default value
   useEffect(() => {
-    field.onChange(selectedType); // Update form value when selection changes
-  }, [selectedType]);
+    if (field.value !== selectedType) {
+      setSelectedType(field.value || ""); // Update state with field.value when it changes
+    }
+  }, [field.value]); // Runs whenever field.value changes
 
   const handleSelection = (type: string) => {
-    // Only set the selected type when clicking a new one
+    // Set the selected type when clicking a new option
     setSelectedType(type);
+    field.onChange(type); // Update the form field value
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-          {selectedType ? selectedType : "Select Cooking Type"}
+          {selectedType || "Select Cooking Type"} {/* If selectedType is empty, show placeholder */}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -43,7 +46,7 @@ const CookingTypeDropdown = ({ field }: { field: any }) => {
           <DropdownMenuItem
             key={type}
             onClick={() => handleSelection(type)}
-            className={selectedType === type ? "bg-blue-100" : ""}
+            className={selectedType === type ? "bg-blue-100" : ""} // Highlight selected option
           >
             {type}
           </DropdownMenuItem>
@@ -54,3 +57,4 @@ const CookingTypeDropdown = ({ field }: { field: any }) => {
 };
 
 export default CookingTypeDropdown;
+
