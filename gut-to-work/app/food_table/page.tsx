@@ -5,6 +5,7 @@ import axios from "axios";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
 
 import { Button } from "../components/Button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/Table";
@@ -39,7 +40,7 @@ import { groupFoodRecords } from "./functions";
 
 const formSchema = z.object({
   date: z.string({ required_error: "Date is required" }),
-  time_of_day: z.string({required_error: "Time of day is required"}),
+  time_of_day: z.string({ required_error: "Time of day is required" }),
   ingredients: z.array(z.string()),
   ingredients_info: z.record(
     z.object({
@@ -50,15 +51,28 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
+function groupByDateAndTime(foodRecords: FoodRecords) {
+  const grouped: Record<string, Record<string, FoodRecord[]>> = {};
+
+  foodRecords.forEach((record) => {
+    const date = record.record_date;
+    const time = record.time_of_day;
+
+    if (!grouped[date]) {
+      grouped[date] = {};
+    }
+    if (!grouped[date][time]) {
+      grouped[date][time] = [];
+    }
+
+    grouped[date][time].push(record);
+  });
+
+  return grouped;
+}
+
 export default function DashboardPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  useEffect(() => {
-    fetch("https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients")
-      .then((res) => res.json())
-      .then(setIngredients)
-      .catch(console.error);
-  }, []);
-
   const [foodRecords, setFoodRecords] = useState<FoodRecords>([]);
   const [open, setOpen] = useState(false);
 
@@ -69,7 +83,7 @@ export default function DashboardPage() {
       time_of_day: "",
       ingredients: [],
       ingredients_info: {},
-    }
+    },
   });
 
   const selectedIngredients = form.watch("ingredients") || [];
@@ -91,38 +105,44 @@ export default function DashboardPage() {
 
   // Fetch food records
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchFoodRecords = async () => {
       try {
         const response = await axios.get(
           "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records"
         );
-        setFoodRecords(response.data);
+        const formattedRecords = response.data.map((record: any) => {
+          const ingredients = JSON.parse(record.ingredients_json);
+          return {
+            ...record,
+            ingredients,
+          };
+        });
+        setFoodRecords(formattedRecords);
       } catch (error) {
         console.error("Failed to fetch food records", error);
       }
     };
-    fetchData();
+    fetchFoodRecords();
   }, []);
-
-  const groupedRecords = groupFoodRecords(foodRecords);
 
   // Clear dependent fields when ingredients are deselected
   useEffect(() => {
     const deselectedIngredients = Object.keys(form.getValues("ingredients_info")).filter(
       (id) => !selectedIngredients.includes(id)
     );
-  
+
     // Reset ingredients_info for deselected ingredients
     deselectedIngredients.forEach((id) => {
-      form.setValue(`ingredients_info.${id}`, { cookingType: "", portionSize: "" }); // Reset to default object
+      form.setValue(`ingredients_info.${id}`, { cookingType: "", portionSize: "" });
     });
   }, [selectedIngredients, form]);
 
   const onSubmit = async (data: FormData) => {
+    console.log("Form submitted with data:", data);  // This will log when the form is submitted
+  
     try {
-      // Prepare the payload for the POST request
       const payload = {
-        record_date: data.date, // Use record_date instead of date
+        record_date: data.date,
         time_of_day: data.time_of_day,
         ingredients: data.ingredients.map((ingredientId) => {
           const ingredientInfo = data.ingredients_info[ingredientId];
@@ -130,38 +150,47 @@ export default function DashboardPage() {
   
           return {
             ingredient_id: ingredientId,
-            ingredient_name: ingredient?.ingredient_name || "",  // Make sure ingredient_name exists
-            cooking_type: ingredientInfo?.cookingType || "", // Ensure cooking_type is defined
-            portion_size: ingredientInfo?.portionSize || "", // Ensure portion_size is defined
+            ingredient_name: ingredient?.ingredient_name || "",
+            cooking_type: ingredientInfo?.cookingType || "",
+            portion_size: ingredientInfo?.portionSize || "",
           };
         }),
       };
   
-      // Log the payload to verify the format before sending it
-      console.log("Payload being sent:", payload);
+      // Log the payload to see if it's being constructed properly
+      console.log("Payload:", payload);
   
-      // Make the POST request
+      // Make the POST request to add the food record
       const response = await axios.post(
         "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records",
-        payload,
+        payload
       );
   
-      console.log("Food Record Created:", response.data);
+      // Log the response to see if it contains the expected data
+      console.log("API Response: ", response.data);  // Check if the response is returned
   
-      // Optionally, update the food records state or perform other actions on success
-      setFoodRecords((prev) => [...prev, response.data]);
+      // Continue with your logic if the request is successful
+      const newRecord = {
+        ...response.data,
+        // Don't parse — assume already structured
+        ingredients: response.data.ingredients,
+      };
+      
+      setFoodRecords((prev) => [newRecord, ...prev]);
   
       // Reset the form and close the dialog
       form.reset();
-      setOpen(false);
+setOpen(false);
     } catch (error) {
       console.error("Failed to create food record", error);
     }
   };
   
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-8"
+      style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}
+    >
       <h1 className="text-4xl font-bold mb-4">Food Records</h1>
 
       {/* ----- Food Table ----- */}
@@ -169,43 +198,61 @@ export default function DashboardPage() {
         <Table className="border-collapse">
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Time of Day</TableHead>
-              <TableHead>Ingredient</TableHead>
-              <TableHead>Cooking Type</TableHead>
+              <TableHead className="w-[150px]">Date</TableHead>
+              <TableHead className="w-[120px]">Time of Day</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Cooking Style</TableHead>
               <TableHead>Portion Size</TableHead>
-              <TableHead className="w-[50px] text-center"></TableHead> {/* Edit/Delete */}
+              <TableHead className="w-[50px] text-center"></TableHead> {/* Delete */}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Object.entries(groupedRecords)
-              .sort(([a], [b]) => new Date(a) - new Date(b)) // Sort by date
-              .map(([date, timeGroups]) =>
-                Object.entries(timeGroups)
-                  .sort(([a], [b]) => a.localeCompare(b)) // Optional: sort time of day (e.g., morning, afternoon)
-                  .map(([timeOfDay, records], timeIndex) =>
-                    records.map((record, index) => (
-                      <TableRow key={`${record["foodRecord-id"]}-${index}`}>
-                        {index === 0 && timeIndex === 0 && (
-                          <TableCell rowSpan={Object.values(timeGroups).flat().length} className="align-top font-bold">
+            {foodRecords.length > 0 ? (
+              Object.entries(groupByDateAndTime(foodRecords)).map(([date, times]) => {
+                const totalDateRows = Object.values(times).reduce(
+                  (acc, records) => acc + (records?.reduce((rAcc, r) => rAcc + (r.ingredients?.length || 0), 0) || 0),
+                  0
+                );
+
+                let hasRenderedDate = false;
+
+                return Object.entries(times).map(([time, records]) => {
+                  const timeRowCount = records.reduce((acc, record) => acc + (record.ingredients?.length || 0), 0);
+                  let hasRenderedTime = false;
+
+                  return records.flatMap((record) =>
+                    record.ingredients?.map((ingredient, index) => (
+                      <TableRow key={`${record["food-record-id"]}-${ingredient.ingredient_id}-${index}`}>
+                        {!hasRenderedDate && (
+                          <TableCell rowSpan={totalDateRows} className="align-top font-semibold">
                             {date}
                           </TableCell>
                         )}
-                        {index === 0 && (
-                          <TableCell rowSpan={records.length} className="align-top font-semibold italic">
-                            {timeOfDay}
+                        {!hasRenderedTime && (
+                          <TableCell rowSpan={timeRowCount} className="italic align-top">
+                            {time}
                           </TableCell>
                         )}
-                        <TableCell>{record.ingredient_name}</TableCell>
-                        <TableCell>{record.cooking_type}</TableCell>
-                        <TableCell>{record.portion_size}</TableCell>
-                        <TableCell className="text-center">
-                          {/* Optional: edit/delete buttons */}
+                        <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell>
+                        <TableCell>{ingredient.cooking_type}</TableCell>
+                        <TableCell>{ingredient.portion_size}</TableCell>
+                        <TableCell className="text-center text-blue-700 underline cursor-pointer">
+                          delete
                         </TableCell>
+                        {(hasRenderedDate = true)}
+                        {(hasRenderedTime = true)}
                       </TableRow>
                     ))
-                  )
-              )}
+                  );
+                });
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">
+                  No records available
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -217,7 +264,7 @@ export default function DashboardPage() {
         <AlertDialogContent className="max-h-screen overflow-y-auto">
           <AlertDialogTitle>Create ingredient</AlertDialogTitle>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
                 name="date"
@@ -246,12 +293,7 @@ export default function DashboardPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuSeparator />
-                          {[
-                            "morning",
-                            "afternoon",
-                            "evening",
-                            "night",
-                          ].map((type) => (
+                          {["morning", "afternoon", "evening", "night"].map((type) => (
                             <DropdownMenuItem
                               key={type}
                               onSelect={() => field.onChange(type)}
@@ -302,7 +344,6 @@ export default function DashboardPage() {
                         <FormItem>
                           <FormLabel>Cooking type for {ingredient?.ingredient_name}</FormLabel>
                           <FormControl>
-                            {/* Directly insert the dropdown logic here */}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
@@ -310,22 +351,22 @@ export default function DashboardPage() {
                                 </div>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
-                              <DropdownMenuSeparator />
-                          {[
-                            "raw",
-                            "boiled",
-                            "deep fried",
-                            "pan fried",
-                            "baked",
-                            "infused",
-                          ].map((type) => (
-                            <DropdownMenuItem
-                              key={type}
-                              onSelect={() => field.onChange(type)}
-                            >
-                              {type}
-                            </DropdownMenuItem>
-                          ))}
+                                <DropdownMenuSeparator />
+                                {[
+                                  "raw",
+                                  "boiled",
+                                  "deep fried",
+                                  "pan fried",
+                                  "baked",
+                                  "infused",
+                                ].map((type) => (
+                                  <DropdownMenuItem
+                                    key={type}
+                                    onSelect={() => field.onChange(type)}
+                                  >
+                                    {type}
+                                  </DropdownMenuItem>
+                                ))}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </FormControl>
@@ -337,32 +378,28 @@ export default function DashboardPage() {
                     <FormField
                       control={form.control}
                       name={`ingredients_info.${id}.portionSize`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Portion Size for {ingredient?.ingredient_name}</FormLabel>
-                          <FormControl>
-                            <PortionSizeDropdown field={field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                );
-              })}
+render={({ field }) => (
+<FormItem>
+<FormLabel>Portion size for {ingredient?.ingredient_name}</FormLabel>
+<FormControl>
+<PortionSizeDropdown field={field}/>
+</FormControl>
+<FormMessage />
+</FormItem>
+)}
+/>
+</div>
+);
+})}
 
-              <div className="flex items-center justify-end space-x-4">
-                <AlertDialogCancel asChild>
-                  <Button variant="outline" type="button">
-                    Cancel
-                  </Button>
-                </AlertDialogCancel>
-                <Button type="submit">Submit</Button>
-              </div>
-            </form>
-          </Form>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+          {/* Submit Button */}
+          <AlertDialogFooter>
+          <Button type="submit">Submit</Button>
+          </AlertDialogFooter>
+        </form>
+      </Form>
+    </AlertDialogContent>
+  </AlertDialog>
+</div>
   );
 }

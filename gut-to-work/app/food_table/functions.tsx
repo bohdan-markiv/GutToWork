@@ -1,19 +1,16 @@
-import type { FoodRecord } from "../types";// Adjust the path as needed
+import type { FoodRecord, GroupedFoodRecords } from "../types";// Adjust the path as needed
 
-export function groupFoodRecords(foodRecords: FoodRecord[]) {
-  return foodRecords.reduce((acc, record) => {
-    const { record_date: date, time_of_day: timeOfDay } = record;
+export function groupFoodRecords(foodRecords: FoodRecord[]): GroupedFoodRecords {
+  const grouped: GroupedFoodRecords = {};
 
-    if (!acc[date]) {
-      acc[date] = {};
-    }
+  foodRecords.forEach((record) => {
+    const { record_date, time_of_day } = record;
 
-    if (!acc[date][timeOfDay]) {
-      acc[date][timeOfDay] = [];
-    }
+    if (!grouped[record_date]) grouped[record_date] = {};
+    if (!grouped[record_date][time_of_day]) grouped[record_date][time_of_day] = [];
 
-    acc[date][timeOfDay].push(record);
+    grouped[record_date][time_of_day].push(record);
+  });
 
-    return acc;
-  }, {} as Record<string, Record<string, FoodRecord[]>>);
+  return grouped;
 }

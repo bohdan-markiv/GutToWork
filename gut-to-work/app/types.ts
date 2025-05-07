@@ -29,3 +29,9 @@ export type FoodRecord = {
 };
 
 export type FoodRecords = FoodRecord[];
+
+export type GroupedFoodRecords = {
+  [record_date: string]: {
+    [time_of_day: string]: FoodRecord[];
+  };
+};
