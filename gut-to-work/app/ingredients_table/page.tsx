@@ -6,7 +6,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";      
+
+import { Trash2, Home } from "lucide-react";
 
 import { Button } from "../components/Button";
 import {
@@ -67,6 +69,7 @@ export default function DashboardPage() {
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   // ----- Fetch Ingredients -----
   useEffect(() => {
@@ -190,6 +193,118 @@ export default function DashboardPage() {
     >
       <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
+      <div className="w-full max-w-6xl mb-4 flex justify-between">
+  <Button
+    onClick={() => {
+      router.push("/welcome_page");
+    }}
+    className="hover:!bg-gray-500"
+  >
+    <Home className="w-4 h-4" />
+  </Button>
+
+<div className="absolute left-1/2 transform -translate-x-1/2">
+  <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialogTrigger asChild>
+      <Button className="hover:!bg-gray-500">Create Ingredient</Button>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+      <AlertDialogTitle>Create ingredient</AlertDialogTitle>
+      {errorMessage && (
+        <div className="text-red-600 text-sm font-medium mb-2">
+          {errorMessage}
+        </div>
+      )}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Ingredient Name */}
+          <FormField
+            control={form.control}
+            name="ingredient_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ingredient Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Potato" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Cooking Type */}
+          <FormField
+            control={form.control}
+            name="default_cooking_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Cooking Type</FormLabel>
+                <FormControl>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                        {field.value || "Select Cooking Type"}
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuSeparator />
+                      {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
+                        <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                          {type}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Default Size */}
+          <FormField
+            control={form.control}
+            name="default_size"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Size</FormLabel>
+                <FormControl>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                        {field.value || "Select Portion Size"}
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuSeparator />
+                      {["small", "normal", "big"].map((type) => (
+                        <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                          {type}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-center justify-end space-x-4">
+            <AlertDialogCancel asChild>
+              <Button variant="outline" type="button">
+                Cancel
+              </Button>
+            </AlertDialogCancel>
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+      </Form>
+    </AlertDialogContent>
+  </AlertDialog>
+</div>
+</div>
+
       {/* ----- Display Success Message ----- */}
       {successMessage && (
         <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
@@ -286,118 +401,7 @@ export default function DashboardPage() {
         </AlertDialog>
       )}
 
-      {/* ----- Create Ingredient Form via AlertDialog ----- */}
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogTrigger asChild>
-          <Button className="mt-4 hover:!bg-gray-500">Create Ingredient</Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogTitle>Create ingredient</AlertDialogTitle>
-          {errorMessage && (
-            <div className="text-red-600 text-sm font-medium mb-2">
-              {errorMessage}
-            </div>
-          )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Ingredient Name */}
-              <FormField
-                control={form.control}
-                name="ingredient_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ingredient Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Potato" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Cooking Type */}
-              <FormField
-                control={form.control}
-                name="default_cooking_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Default Cooking Type</FormLabel>
-                    <FormControl>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                            {field.value || "Select Cooking Type"}
-                          </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuSeparator />
-                          {[
-                            "raw",
-                            "boiled",
-                            "deep fried",
-                            "pan fried",
-                            "baked",
-                            "infused",
-                          ].map((type) => (
-                            <DropdownMenuItem
-                              key={type}
-                              onSelect={() => field.onChange(type)}
-                            >
-                              {type}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Default Size */}
-              <FormField
-                control={form.control}
-                name="default_size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Default Size</FormLabel>
-                    <FormControl>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                            {field.value || "Select Portion Size"}
-                          </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuSeparator />
-                          {["small", "normal", "big"].map((type) => (
-                            <DropdownMenuItem
-                              key={type}
-                              onSelect={() => field.onChange(type)}
-                            >
-                              {type}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-center justify-end space-x-4">
-                <AlertDialogCancel asChild>
-                  <Button variant="outline" type="button">
-                    Cancel
-                  </Button>
-                </AlertDialogCancel>
-                <Button type="submit">Submit</Button>
-              </div>
-            </form>
-          </Form>
-        </AlertDialogContent>
-      </AlertDialog>
+      
     </div>
   );
 }
