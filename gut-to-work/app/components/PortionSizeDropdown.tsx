@@ -1,29 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+import { useFormContext } from 'react-hook-form'; // Import useFormContext for form control
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "./DropdownMenu"; // Adjust path as needed
+} from './DropdownMenu'; // Assuming these are correct imports
 
-const sizeOptions = [
-  "small",
-  "normal",
-  "big"
-];
+const sizeOptions = ["small", "normal", "big"];
 
 const PortionSizeDropdown = ({
   field,
   defaultValue,
 }: {
-  field: any;
+  field: any;  // Field from React Hook Form
   defaultValue: string;
 }) => {
-  const [selectedType, setSelectedType] = useState<string>(field.value || defaultValue || "");
+  const [selectedType, setSelectedType] = useState<string>(defaultValue || ""); 
 
+  // Sync internal state with field value from React Hook Form
   useEffect(() => {
-    // If the form's value changes externally, update selectedType
+    // Only update internal state if the field value changes
     if (field.value !== selectedType) {
       setSelectedType(field.value || defaultValue || "");
     }
@@ -31,7 +29,7 @@ const PortionSizeDropdown = ({
 
   const handleSelection = (type: string) => {
     setSelectedType(type);
-    field.onChange(type); // update form state
+    field.onChange(type); // Update React Hook Form state manually
   };
 
   return (
@@ -58,3 +56,4 @@ const PortionSizeDropdown = ({
 };
 
 export default PortionSizeDropdown;
+

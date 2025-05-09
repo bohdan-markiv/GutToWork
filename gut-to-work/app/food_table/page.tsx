@@ -55,7 +55,10 @@ export default function DashboardPage() {
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [recordToDelete, setRecordToDelete] = useState<any | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter()
+  
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -81,62 +84,107 @@ export default function DashboardPage() {
     fetchIngredients();
   }, []);
 
+  useEffect(() => {
+  if (successMessage) {
+    console.log('Success message changed:', successMessage);
+  }
+}, [successMessage]);
+
   const handleDelete = async (id: string) => {
-    try {
-      await axios.delete(
-        `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records/${id}`
-      );
-      setFoodRecords((prev) => prev.filter((record) => record["food-record-id"] !== id));
-    } catch (err) {
-      console.error("Failed to delete record", err);
-    }
-  };
+  try {
+    const response = await axios.delete(
+      `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records/${id}`
+    );
+    console.log('Deletion response:', response); // Check the response
 
-  const onEditSubmit = async (data: FormData) => {
-    try {
-      const payload = {
-        food_record_id: editingRecord["food-record-id"],
-        record_date: data.date,
-        time_of_day: data.time_of_day,
-        ingredients: data.ingredients.map((ingredientId) => {
-          const info = data.ingredients_info[ingredientId];
-          const ingredient = ingredients.find((i) => i["ingredients-id"] === ingredientId);
-          return {
-            ingredient_id: ingredientId,
-            ingredient_name: ingredient?.ingredient_name || "",
-            cooking_type: info?.cookingType || "",
-            portion_size: info?.portionSize || "",
-          };
-        }),
-      };
+    // Check if this line is being called
+    console.log('Setting success message');
 
-      const response = await axios.put(
-        `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records/${editingRecord["food-record-id"]}`,
-        payload
-      );
+    setFoodRecords((prev) => prev.filter((record) => record["food-record-id"] !== id));
+    setSuccessMessage("Record successfully deleted!");
+    setErrorMessage(null);
 
-      const updatedRecord = {
-        ...response.data,
-        record_date: response.data.record_date || data.date,
-        time_of_day: response.data.time_of_day || data.time_of_day,
-        ingredients: payload.ingredients, // make sure this is an array, not JSON string
-      };
-      
-      setFoodRecords((prev) =>
-        prev.map((record) =>
-          record["food-record-id"] === editingRecord["food-record-id"]
-            ? updatedRecord
-            : record
-        )
-      );
+    // Reset the success message after 3 seconds
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
+  } catch (err) {
+    console.error("Failed to delete record", err);
+    setSuccessMessage(null);
+    setErrorMessage("Failed to delete the record. Please try again.");  // Set the error message
 
-      form.reset();
-      setEditingRecord(null);
-      setOpen(false);
-    } catch (error) {
-      console.error("Failed to update food record", error);
-    }
-  };
+    setTimeout(() => {
+      setErrorMessage(null); // Hide the error message after 3 seconds
+    }, 3000);
+  }
+};
+
+
+const onEditSubmit = async (data: FormData) => {
+  try {
+    const payload = {
+      food_record_id: editingRecord["food-record-id"],
+      record_date: data.date,
+      time_of_day: data.time_of_day,
+      ingredients: data.ingredients.map((ingredientId) => {
+        const info = data.ingredients_info[ingredientId];
+        const ingredient = ingredients.find((i) => i["ingredients-id"] === ingredientId);
+        return {
+          ingredient_id: ingredientId,
+          ingredient_name: ingredient?.ingredient_name || "",
+          cooking_type: info?.cookingType || "",
+          portion_size: info?.portionSize || "",
+        };
+      }),
+    };
+
+    const response = await axios.put(
+      `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records/${editingRecord["food-record-id"]}`,
+      payload
+    );
+
+    const updatedRecord = {
+      ...response.data,
+      record_date: response.data.record_date || data.date,
+      time_of_day: response.data.time_of_day || data.time_of_day,
+      ingredients: payload.ingredients, // make sure this is an array, not JSON string
+    };
+
+    setFoodRecords((prev) =>
+      prev.map((record) =>
+        record["food-record-id"] === editingRecord["food-record-id"]
+          ? updatedRecord
+          : record
+      )
+    );
+
+    // Set success message on successful update
+    setSuccessMessage("Food record updated successfully!");
+    setErrorMessage(null); // Clear any previous error messages
+
+    // Reset the form and close the modal/dialog
+    form.reset();
+    setEditingRecord(null);
+    setOpen(false);
+
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
+  } catch (error) {
+    console.error("Failed to update food record", error);
+
+    // Set error message if the update fails
+    setErrorMessage("Failed to update the food record. Please try again.");
+    setSuccessMessage(null); // Clear any previous success messages
+
+    // Hide error message after 3 seconds
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 3000);
+  }
+};
+
 
   useEffect(() => {
     const fetchFoodRecords = async () => {
@@ -163,45 +211,72 @@ export default function DashboardPage() {
   }, [editingRecord]);
 
   const onSubmit = async (data: FormData) => {
-    try {
-      const payload = {
-        record_date: data.date,
-        time_of_day: data.time_of_day,
-        ingredients: data.ingredients.map((ingredientId) => {
-          const info = data.ingredients_info[ingredientId];
-          const ingredient = ingredients.find((i) => i["ingredients-id"] === ingredientId);
-          return {
-            ingredient_id: ingredientId,
-            ingredient_name: ingredient?.ingredient_name || "",
-            cooking_type: info?.cookingType || "",
-            portion_size: info?.portionSize || "",
-          };
-        }),
-      };
+  try {
+    const payload = {
+      record_date: data.date,
+      time_of_day: data.time_of_day,
+      ingredients: data.ingredients.map((ingredientId) => {
+        const info = data.ingredients_info[ingredientId];
+        const ingredient = ingredients.find((i) => i["ingredients-id"] === ingredientId);
+        return {
+          ingredient_id: ingredientId,
+          ingredient_name: ingredient?.ingredient_name || "",
+          cooking_type: info?.cookingType || "",
+          portion_size: info?.portionSize || "",
+        };
+      }),
+    };
 
-      const response = await axios.post(
-        "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records",
-        payload
-      );
+    const response = await axios.post(
+      "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records",
+      payload
+    );
 
-      const newRecord = {
-        ...response.data,
-        record_date: response.data.record_date || data.date,
-        time_of_day: response.data.time_of_day || data.time_of_day,
-        ingredients: payload.ingredients,
-      };
-      setFoodRecords((prev) => [newRecord, ...prev]);
+    const newRecord = {
+      ...response.data,
+      record_date: response.data.record_date || data.date,
+      time_of_day: response.data.time_of_day || data.time_of_day,
+      ingredients: payload.ingredients,
+    };
 
-      form.reset();
-      setOpen(false);
-    } catch (error) {
-      console.error("Failed to create food record", error);
-    }
-  };
+    setFoodRecords((prev) => [newRecord, ...prev]);
+
+    // Set success message on successful creation
+    setSuccessMessage("Food record created successfully!");
+    setErrorMessage(null); // Clear any previous error messages
+
+    // Reset the form and close the modal/dialog
+    form.reset();
+    setOpen(false);
+
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
+  } catch (error) {
+    console.error("Failed to create food record", error);
+
+    // Set error message if the creation fails
+    setErrorMessage("Failed to create the food record. Please try again.");
+    setSuccessMessage(null); // Clear any previous success messages
+
+    // Hide error message after 3 seconds
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 3000);
+  }
+};
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-8" style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}>
       <h1 className="text-4xl font-bold mb-4">Food Records</h1>
+
+            {/* ----- Display Success Message ----- */}
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
+          <strong>{successMessage}</strong>
+        </div>
+      )}
 
       <div className="w-full max-w-6xl mb-4 flex justify-between">
   <Button
@@ -353,11 +428,17 @@ export default function DashboardPage() {
                     <FormLabel>Select Ingredients</FormLabel>
                     <FormControl>
                       <IngredientDropdown
-                        control={form.control}
-                        name="ingredients"
-                        ingredients={ingredients}
-                        onAddIngredient={(id) => console.log("Added:", id)}
-                      />
+  control={form.control}
+  name="ingredients"
+  ingredients={ingredients}
+  onAddIngredient={(id) => {
+    const ingredient = ingredients.find((i) => i["ingredients-id"] === id);
+    if (ingredient) {
+      form.setValue(`ingredients_info.${id}.cookingType`, ingredient.default_cooking_type || "");
+      form.setValue(`ingredients_info.${id}.portionSize`, ingredient.default_portion_size || "");
+    }
+  }}
+/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
