@@ -603,7 +603,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/FoodRecord"
-        required: false
+        required: true
       responses:
         "200":
           description: Successful operation
@@ -811,19 +811,14 @@ components:
       items:
         allOf:
           - $ref: "#/components/schemas/Poop"
-    FoodRecord:
+    FoodRecordIngredient:
       type: object
       required:
-        - record_date
         - ingredient_id
         - ingredient_name
         - portion_size
         - cooking_type
-        - time_of_day
       properties:
-        record_date:
-          type: string
-          format: date
         ingredient_id:
           type: string
           example: sjdvnuisfdvsdinv
@@ -838,16 +833,29 @@ components:
           type: string
           enum: [raw, boiled, deep fried, pan fried, baked, infused]
           example: boiled
+    FoodRecord:
+      type: object
+      required:
+        - record_date
+        - time_of_day
+        - ingredients
+      properties:
+        record_date:
+          type: string
+          format: date
+          example: 2025-03-24
         time_of_day:
           type: string
-          enum: [morning, afternoon, noon, night]
+          enum: [morning, afternoon, evening, night]
           example: morning
-
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodRecordIngredient"
     FoodRecords:
       type: array
       items:
-        allOf:
-          - $ref: "#/components/schemas/FoodRecord"
+        $ref: "#/components/schemas/FoodRecord"
     Ingredient:
       type: object
       required:
