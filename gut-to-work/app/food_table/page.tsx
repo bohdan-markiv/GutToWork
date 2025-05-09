@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, Home } from "lucide-react";
 import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -203,34 +203,29 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col items-center justify-start p-8" style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}>
       <h1 className="text-4xl font-bold mb-4">Food Records</h1>
 
-      <div className="relative w-full">
-      {/* Go Back Button - positioned at the top-left corner */}
-      <div className="w-full max-w-6xl">
-        <Button
-          onClick={() => {
-            router.push("/welcome_page");
-          }}
-          className="hover:!bg-gray-500"
-        >
-          Go Back
-        </Button>
-      </div>
-      </div>
+      <div className="w-full max-w-6xl mb-4 flex justify-between">
+  <Button
+    onClick={() => {
+      router.push("/welcome_page");
+    }}
+    className="hover:!bg-gray-500"
+  >
+    <Home className="w-4 h-4" />
+  </Button>
 
-      {/* Create Button at Top */}
-      <div className="mb-4">
-        <Button
-          onClick={() => {
-            form.reset();
-            setEditingRecord(null);
-            setMode("create");
-            setOpen(true);
-          }}
-          className="hover:!bg-gray-500"
-        >
-          Create New Record
-        </Button>
-      </div>
+    
+    <Button
+      onClick={() => {
+        form.reset();
+        setEditingRecord(null);
+        setMode("create");
+        setOpen(true);
+      }}
+      className="hover:!bg-gray-500"
+    >
+      Create New Record
+    </Button>
+</div>
 
 {/* Table with sticky header */}
 <div className="w-full max-w-6xl border-2 border-[var(--background)] rounded-lg">
@@ -376,23 +371,31 @@ export default function DashboardPage() {
                       {ingredient ? ingredient.ingredient_name : "Unknown Ingredient"}
                     </h4>
                     <FormField
-                      control={form.control}
-                      name={`ingredients_info.${id}.cookingType`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cooking Type</FormLabel>
-                          <FormControl><CookingTypeDropdown field={field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+  control={form.control}
+  name={`ingredients_info.${id}.cookingType`}
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Cooking Type</FormLabel>
+      <FormControl>
+        <CookingTypeDropdown
+          field={field}
+          defaultValue={ingredient?.default_cooking_type || ""}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
                     <FormField
                       control={form.control}
                       name={`ingredients_info.${id}.portionSize`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Portion Size</FormLabel>
-                          <FormControl><PortionSizeDropdown field={field} /></FormControl>
+                          <FormControl>
+                            <PortionSizeDropdown 
+                            field={field}
+                            defaultValue={ingredient?.default_portion_size || ""} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
