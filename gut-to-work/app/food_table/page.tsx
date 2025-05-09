@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const [open, setOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [mode, setMode] = useState<"create" | "edit">("create");
+  const [recordToDelete, setRecordToDelete] = useState<any | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -104,10 +105,17 @@ export default function DashboardPage() {
         payload
       );
 
+      const updatedRecord = {
+        ...response.data,
+        record_date: response.data.record_date || data.date,
+        time_of_day: response.data.time_of_day || data.time_of_day,
+        ingredients: payload.ingredients, // make sure this is an array, not JSON string
+      };
+      
       setFoodRecords((prev) =>
         prev.map((record) =>
           record["food-record-id"] === editingRecord["food-record-id"]
-            ? { ...record, ...response.data }
+            ? updatedRecord
             : record
         )
       );
@@ -137,6 +145,12 @@ export default function DashboardPage() {
     };
     fetchFoodRecords();
   }, []);
+
+  useEffect(() => {
+    if (editingRecord) {
+      setOpen(true);
+    }
+  }, [editingRecord]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -194,87 +208,79 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
-        <Table className="border-collapse">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[150px]">Date</TableHead>
-              <TableHead className="w-[150px]">Time of Day</TableHead>
-              <TableHead className="w-[300px]">Ingredients</TableHead>
-              <TableHead className="w-[100px] text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...foodRecords]
-              .sort((a, b) => new Date(b.record_date).getTime() - new Date(a.record_date).getTime())
-              .map((record) => (
-                <TableRow
-                  key={record["food-record-id"]}
-                  onClick={() => {
-                    setEditingRecord(record);
-                    form.setValue("date", record.record_date);
-                    form.setValue("time_of_day", record.time_of_day);
-                    form.setValue("ingredients", record.ingredients.map((i: any) => i.ingredient_id));
-                    record.ingredients.forEach((ing: any) => {
-                      form.setValue(`ingredients_info.${ing.ingredient_id}.cookingType`, ing.cooking_type);
-                      form.setValue(`ingredients_info.${ing.ingredient_id}.portionSize`, ing.portion_size);
-                    });
-                    setMode("edit");
-                    setOpen(true);
+{/* Table with sticky header */}
+<div className="w-full max-w-6xl border-2 border-[var(--background)] rounded-lg">
+  <div className="max-h-[400px] overflow-y-auto relative">
+    <Table className="border-collapse w-full table-fixed">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[150px] sticky top-0 z-20 bg-[var(--background)]">
+            Date
+          </TableHead>
+          <TableHead className="w-[150px] sticky top-0 z-20 bg-[var(--background)]">
+            Time of Day
+          </TableHead>
+          <TableHead className="w-[150px] sticky top-0 z-20 bg-[var(--background)]">
+            Ingredients
+          </TableHead>
+          <TableHead className="w-[150px] sticky top-0 z-20 bg-[var(--background)]">
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {[...foodRecords]
+          .sort((a, b) => new Date(b.record_date).getTime() - new Date(a.record_date).getTime())
+          .map((record) => (
+            <TableRow
+              key={record["food-record-id"]}
+              onClick={() => {
+                setEditingRecord(record);
+                form.setValue("date", record.record_date);
+                form.setValue("time_of_day", record.time_of_day);
+                form.setValue("ingredients", record.ingredients.map((i: any) => i.ingredient_id));
+                record.ingredients.forEach((ing: any) => {
+                  form.setValue(`ingredients_info.${ing.ingredient_id}.cookingType`, ing.cooking_type);
+                  form.setValue(`ingredients_info.${ing.ingredient_id}.portionSize`, ing.portion_size);
+                });
+                setMode("edit");
+              }}
+            >
+              <TableCell>{record.record_date}</TableCell>
+              <TableCell>{record.time_of_day}</TableCell>
+              <TableCell>
+                <ul className="list-disc pl-4">
+                  {record.ingredients?.map((ing: any, idx: number) => (
+                    <li key={idx}>
+                      {ing.ingredient_name} ({ing.cooking_type || "N/A"} {ing.portion_size || "N/A"})
+                    </li>
+                  ))}
+                </ul>
+              </TableCell>
+              <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRecordToDelete(record);
                   }}
+                  className="hover:bg-gray-500 p-2"
                 >
-                  <TableCell>{record.record_date}</TableCell>
-                  <TableCell>{record.time_of_day}</TableCell>
-                  <TableCell>
-                    <ul className="list-disc pl-4">
-                      {record.ingredients?.map((ing: any, idx: number) => (
-                        <li key={idx}>
-                          {ing.ingredient_name} ({ing.cooking_type || "N/A"} {ing.portion_size || "N/A"})
-                        </li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          onClick={(e) => e.stopPropagation()}
-                          className="hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete this food record.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(record["food-record-id"])}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            {foodRecords.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No records available
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        {foodRecords.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={4} className="text-center">
+              No records available
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </div>
+</div>
+
 
       {/* Form Modal */}
       <AlertDialog open={open} onOpenChange={setOpen}>
@@ -364,6 +370,33 @@ export default function DashboardPage() {
           </Form>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!recordToDelete} onOpenChange={(open) => {
+  if (!open) setRecordToDelete(null);
+}}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This will permanently delete this food record.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel onClick={() => setRecordToDelete(null)}>Cancel</AlertDialogCancel>
+      <AlertDialogAction
+        onClick={async () => {
+          if (recordToDelete) {
+            await handleDelete(recordToDelete["food-record-id"]);
+            setRecordToDelete(null);
+          }
+        }}
+      >
+        Delete
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
     </div>
   );
 }
