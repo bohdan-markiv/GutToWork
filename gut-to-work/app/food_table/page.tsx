@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import axios from "axios";
 import React from "react";
@@ -26,6 +27,14 @@ import {
   AlertDialogDescription,
 } from "../components/AlertDialog";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/DropdownMenu";
+
 const formSchema = z.object({
   date: z.string({ required_error: "Date is required" }),
   time_of_day: z.string({ required_error: "Time of day is required" }),
@@ -46,6 +55,7 @@ export default function DashboardPage() {
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [recordToDelete, setRecordToDelete] = useState<any | null>(null);
+  const router = useRouter()
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -193,6 +203,20 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col items-center justify-start p-8" style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}>
       <h1 className="text-4xl font-bold mb-4">Food Records</h1>
 
+      <div className="relative w-full">
+      {/* Go Back Button - positioned at the top-left corner */}
+      <div className="w-full max-w-6xl">
+        <Button
+          onClick={() => {
+            router.push("/welcome_page");
+          }}
+          className="hover:!bg-gray-500"
+        >
+          Go Back
+        </Button>
+      </div>
+      </div>
+
       {/* Create Button at Top */}
       <div className="mb-4">
         <Button
@@ -305,7 +329,23 @@ export default function DashboardPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Time of Day</FormLabel>
-                    <FormControl><Input {...field} placeholder="Enter time of day" /></FormControl>
+                    <FormControl>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                            {field.value || "Select time of day"}
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuSeparator />
+                          {["morning", "afternoon", "evening", "night"].map((type) => (
+                            <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                              {type}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
