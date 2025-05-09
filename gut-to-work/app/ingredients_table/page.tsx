@@ -314,8 +314,9 @@ export default function DashboardPage() {
 
       {/* ----- Ingredients Table ----- */}
       <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
+        <div className="relative max-h-[400px] overflow-y-auto">
         <Table className="border-collapse">
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-white z-10">
             <TableRow>
               <TableHead className="w-[100px]">Name</TableHead>
               <TableHead>Default Cooking style</TableHead>
@@ -379,6 +380,7 @@ export default function DashboardPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {selectedIngredient && (
