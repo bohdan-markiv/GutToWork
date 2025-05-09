@@ -1,12 +1,15 @@
 "use client"; 
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Trash2 } from "lucide-react";
+import { Home } from "lucide-react";
+
 
 import { Slider } from "../components/Slider";
 <Slider defaultValue={[33]} max={100} step={1} />
@@ -56,7 +59,7 @@ import { EditFeelingForm } from "../components/EditFeelingForm";
 
 
 
-// ----- Zod Schema for Feeling Form ----- "Look at the schema I made and generate a TypeScript type that matches it."
+// ----- Zod Schema for Feeling Form ----- 
 const formSchema = z.object({
     feeling_score: z
       .number({ invalid_type_error: "Feeling score must be a number" })
@@ -76,11 +79,12 @@ const formSchema = z.object({
       }),
   });
   
-  type FormData = z.infer<typeof formSchema>; // typeof formSchema tells it: "Use the shape of the formSchema I just wrote."
+  type FormData = z.infer<typeof formSchema>; 
 
 
 
   export default function FeelingsPage() { // Creating a page component. This defines the things that are on the Page. Prepares all things you need to store ing, select ingredients, open/close modals and show success error messages inside the page.
+    const router = useRouter();
     const [feelings, setFeelings] = useState<Feeling[]>([]);
     const [selectedFeeling, setSelectedFeeling] = useState<Feeling | null>(null);
     const [open, setOpen] = useState(false);
@@ -220,6 +224,8 @@ return (
     >
       <h1 className="text-4xl font-bold mb-4">Feelings</h1>
 
+
+
             {/* ----- Display Success Message ----- */}
             {successMessage && (
                 <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md"> 
@@ -228,87 +234,11 @@ return (
                 </div>
             )}
 
-            {/* ----- Feelings Table ----- */}
-            <div className="w-full max-w-4xl overflow-auto border-2 border-[var(--background)] rounded-lg">
-                <Table className="border-collapse">
-                     <TableHeader>
-                        <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-center">Feeling Score</TableHead>
-                            <TableHead className="text-center">Stress Level</TableHead>
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Delete button */}
-                        </TableRow>
-                     </TableHeader>
-                     <TableBody>
-                        {feelings.map((feeling) => (
-                   
-                            <TableRow
-                                key={feeling["feeling-id"]}
-                                onClick={() => setSelectedFeeling(feeling)}
-                                className="cursor-pointer"
-                            >
-                                <TableCell>{feeling.feeling_date}</TableCell>
-                                <TableCell className="text-center">{feeling.feeling_score}</TableCell>
-                                <TableCell className="text-center">{feeling.stress_level}</TableCell>
-                                <TableCell className="text-center">
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="mt-2 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
-                                                    
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                {errorMessage && (
-                                                    <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>)}
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        This will permanently delete the selected feeling.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDelete(feeling["feeling-id"])}>Delete</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-
-
-            {/* Create Edit Form - When a row is clicked, selectedFeeling gets set - This shows a modal (AlertDialog) with your EditFeelingForm inside it*/}
-            {selectedFeeling && (
-                <AlertDialog open={!!selectedFeeling} onOpenChange={() => setSelectedFeeling(null)}>
-                    <AlertDialogContent className="max-w-lg">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Edit Feeling</AlertDialogTitle>
-                        </AlertDialogHeader>
-                        <EditFeelingForm
-                            feeling={selectedFeeling}
-                            onSubmit={handleEditSubmit}
-                            onCancel={() => setSelectedFeeling(null)} // Close the dialog
-                            successMessage={successMessage}
-                            errorMessage={errorMessage}
-                        />
-                    </AlertDialogContent>
-                </AlertDialog>
-            )}
-
-
-
-            {/* ----- Create Feeling Form via AlertDialog ----- */}
+            {/* Centered Create Button */}
+            <div className="mb-4 flex justify-center">
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogTrigger asChild>
-                    <Button className="mt-6 hover:!bg-gray-500">Create Feeling</Button>
+                <Button className="hover:!bg-gray-500">Create Feeling</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogTitle>Create Feeling</AlertDialogTitle>
@@ -389,8 +319,105 @@ return (
                             </div>
                         </form>
                         </Form>
+                </AlertDialogContent>
+            </AlertDialog>
+            </div>
+
+ 
+            {/* ----- Feelings Table with Home Button ----- */}
+            <div className="relative w-full max-w-4xl">
+
+            {/* Home Button - positioned above top-left corner of the table */}
+            <div className="absolute -top-12 left-0">
+                <Button
+                onClick={() => router.push("/welcome_page")}
+                className="p-3 bg-sky-500 hover:bg-sky-600 rounded-xl shadow"
+                >
+                <Home className="w-5 h-5 text-white" />
+                </Button>
+            </div>
+
+            {/* Actual table container */}
+            <div className="overflow-auto border-2 border-[var(--background)] rounded-lg">
+                <Table className="border-collapse">
+                <TableHeader>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="text-center">Feeling Score</TableHead>
+                            <TableHead className="text-center">Stress Level</TableHead>
+                            <TableHead className="w-[50px] text-center"></TableHead> {/* Delete button */}
+                        </TableRow>
+                     </TableHeader>
+                     <TableBody>
+                        {feelings.map((feeling) => (
+                   
+                            <TableRow
+                                key={feeling["feeling-id"]}
+                                onClick={() => setSelectedFeeling(feeling)}
+                                className="cursor-pointer"
+                            >
+                                <TableCell>{feeling.feeling_date}</TableCell>
+                                <TableCell className="text-center">{feeling.feeling_score}</TableCell>
+                                <TableCell className="text-center">{feeling.stress_level}</TableCell>
+                                <TableCell className="text-center">
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="mt-2 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
+                                                    
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                {errorMessage && (
+                                                    <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>)}
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This will permanently delete the selected feeling.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(feeling["feeling-id"])}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+
+            </div>
+                  
+
+
+            {/* Create Edit Form - When a row is clicked, selectedFeeling gets set - This shows a modal (AlertDialog) with your EditFeelingForm inside it*/}
+            {selectedFeeling && (
+                <AlertDialog open={!!selectedFeeling} onOpenChange={() => setSelectedFeeling(null)}>
+                    <AlertDialogContent className="max-w-lg">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Edit Feeling</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <EditFeelingForm
+                            feeling={selectedFeeling}
+                            onSubmit={handleEditSubmit}
+                            onCancel={() => setSelectedFeeling(null)} // Close the dialog
+                            successMessage={successMessage}
+                            errorMessage={errorMessage}
+                        />
                     </AlertDialogContent>
-                    </AlertDialog>
+                </AlertDialog>
+            )}
+
+
+
+
     </div>
   );
 }
