@@ -288,7 +288,7 @@ const onEditSubmit = async (data: FormData) => {
     <Home className="w-4 h-4" />
   </Button>
 
-    
+    <div className="absolute left-1/2 transform -translate-x-1/2">
     <Button
       onClick={() => {
         form.reset();
@@ -300,6 +300,7 @@ const onEditSubmit = async (data: FormData) => {
     >
       Create New Record
     </Button>
+    </div>
 </div>
 
 {/* Table with sticky header */}
