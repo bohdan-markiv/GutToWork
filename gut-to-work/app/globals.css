@@ -4,22 +4,24 @@
 
 /* ----- Custom Properties ----- */
 :root {
-  --background: #daeffb; /* Light blue */
-  --foreground: #000B4B; /* Dark blue */
-  --primary: #1CADE6; /* Soft blue */
-  --secondary: #DBDBDB; /* Light pink */
-  --accent: #DBDBDB; /* gray scale version of #f9c9ed pink from logo */
+  --background: #daeffb; /* Page background */
+  --surface: #ffffff; /* Card, surface color - PURE WHITE */
+  --foreground: #000B4B;
+  --primary: #1CADE6;
+  --secondary: #DBDBDB;
+  --accent: #DBDBDB;
   --border-radius: 0.5rem;
   --transition: 0.3s ease;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #000B4B; /* Dark blue */
-    --foreground: #ecf0f1; /* Light gray */
-    --primary: #1CADE6; /* Soft blue */
-    --secondary: #DBDBDB; /* Light pink */
-    --accent: #DBDBDB; /* gray scale version of #f9c9ed pink from logo */
+    --background: #1e293b;
+    --surface: #0b1120;/* Deep blue-gray for "white" surfaces */
+    --foreground: #E0E7FF;
+    --primary: #3B82F6;
+    --secondary: #374151;
+    --accent: #6B7280;/* gray scale version of #f9c9ed pink from logo */
     --border-radius: 0.5rem;
     --transition: 0.3s ease;
   }
