@@ -164,6 +164,82 @@ export default function DashboardPage() {
         <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'white', color: 'var(--primary)' }}>
             <h1 className="text-4xl font-bold mb-4">Poop</h1>
 
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogTrigger asChild>
+                    <Button className="mb-4 hover:!bg-gray-500">Create Poop Record</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    {errorMessage && (
+                        <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>
+                    )}
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <FormField control={form.control} name="poop_date" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Poop Date</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., 2025-04-26" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            <FormField control={form.control} name="time_of_day" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Time of Day</FormLabel>
+                                    <FormControl>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                                                    {field.value || "Select Time of Day"}
+                                                </div>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuSeparator />
+                                                {['morning', 'afternoon', 'evening', 'night'].map((type) => (
+                                                    <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                                                        {type}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            <FormField control={form.control} name="score" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Score</FormLabel>
+                                    <FormControl>
+                                        <div className="flex space-x-1">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <button
+                                                    type="button"
+                                                    key={star}
+                                                    onClick={() => field.onChange(star)}
+                                                    className={`text-2xl ${star <= field.value ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                >
+                                                    ★
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            <div className="flex items-center justify-end space-x-4">
+                                <AlertDialogCancel asChild>
+                                    <Button variant="outline" type="button">Cancel</Button>
+                                </AlertDialogCancel>
+                                <Button type="submit">Submit</Button>
+                            </div>
+                        </form>
+                    </Form>
+                </AlertDialogContent>
+            </AlertDialog>
+
             {successMessage && (
                 <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
                     <strong>{successMessage}</strong>
@@ -244,82 +320,6 @@ export default function DashboardPage() {
                     </AlertDialogContent>
                 </AlertDialog>
             )}
-
-            <AlertDialog open={open} onOpenChange={setOpen}>
-                <AlertDialogTrigger asChild>
-                    <Button className="mt-4 hover:!bg-gray-500">Create Poop Record</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    {errorMessage && (
-                        <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>
-                    )}
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <FormField control={form.control} name="poop_date" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Poop Date</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g., 2025-04-26" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <FormField control={form.control} name="time_of_day" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Time of Day</FormLabel>
-                                    <FormControl>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                                                    {field.value || "Select Time of Day"}
-                                                </div>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                <DropdownMenuSeparator />
-                                                {["morning", "afternoon", "evening", "night"].map((type) => (
-                                                    <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
-                                                        {type}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <FormField control={form.control} name="score" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Score</FormLabel>
-                                    <FormControl>
-                                        <div className="flex space-x-1">
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <button
-                                                    type="button"
-                                                    key={star}
-                                                    onClick={() => field.onChange(star)}
-                                                    className={`text-2xl ${star <= field.value ? 'text-yellow-400' : 'text-gray-300'}`}
-                                                >
-                                                    ★
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <div className="flex items-center justify-end space-x-4">
-                                <AlertDialogCancel asChild>
-                                    <Button variant="outline" type="button">Cancel</Button>
-                                </AlertDialogCancel>
-                                <Button type="submit">Submit</Button>
-                            </div>
-                        </form>
-                    </Form>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 }
