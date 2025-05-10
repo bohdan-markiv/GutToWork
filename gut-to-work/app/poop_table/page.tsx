@@ -66,6 +66,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function DashboardPage() {
+    const router = useRouter();
   const [poop, setPoop] = useState<Poop[]>([]);
   const [selectedPoop, setSelectedPoop] = useState<Poop | null>(null);
   const [open, setOpen] = useState(false);
