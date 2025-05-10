@@ -5,6 +5,11 @@ import axios from "axios";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { Home } from "lucide-react";
+
+
+
 
 import {
   Table,
@@ -253,98 +258,120 @@ export default function DashboardPage() {
       className="min-h-screen flex flex-col items-center justify-center p-8"
       style={{ backgroundColor: "white", color: "var(--primary)" }}
     >
-      <h1 className="text-4xl font-bold mb-4">Poop</h1>
+        <h1 className="text-4xl font-bold mb-4">Poop</h1>
 
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogTrigger asChild>
-          <Button className="mb-4 hover:!bg-gray-500">
-            Create Poop Record
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          {errorMessage && (
-            <div className="text-red-600 text-sm font-medium mb-2">
-              {errorMessage}
-            </div>
-          )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="poop_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Poop Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="time_of_day"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Time of Day</FormLabel>
-                    <FormControl>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                            {field.value || "Select Time of Day"}
-                          </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuSeparator />
-                          {["morning", "afternoon", "evening", "night"].map(
-                            (type) => (
-                              <DropdownMenuItem
+        <div className="w-full max-w-6xl mb-4 flex justify-center relative">
+        {/* Home button on the left */}
+        <div className="absolute left-0">
+            <Button
+            onClick={() => {
+                router.push("/welcome_page");
+            }}
+            className="hover:!bg-gray-500"
+            >
+            <Home className="w-4 h-4" />
+            </Button>
+        </div>
+
+        {/* Create Poop Record dialog */}
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+            <Button
+                onClick={() => {
+                form.reset();
+                setSelectedPoop(null);
+                setOpen(true);
+                }}
+                className="hover:!bg-gray-500"
+            >
+                Create Poop Record
+            </Button>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent>
+            {errorMessage && (
+                <div className="text-red-600 text-sm font-medium mb-2">
+                {errorMessage}
+                </div>
+            )}
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                    control={form.control}
+                    name="poop_date"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Poop Date</FormLabel>
+                        <FormControl>
+                        <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="time_of_day"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Time of Day</FormLabel>
+                        <FormControl>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                                {field.value || "Select Time of Day"}
+                            </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                            <DropdownMenuSeparator />
+                            {["morning", "afternoon", "evening", "night"].map((type) => (
+                                <DropdownMenuItem
                                 key={type}
                                 onSelect={() => field.onChange(type)}
-                              >
+                                >
                                 {type}
-                              </DropdownMenuItem>
-                            )
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="score"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Score</FormLabel>
-                    <FormControl>
-                      <Slider
-                        defaultValue={[field.value ?? 3]}
-                        min={1}
-                        max={5}
-                        step={1}
-                        onValueChange={(val: number[]) => field.onChange(val[0])}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex items-center justify-end space-x-4">
-                <AlertDialogCancel asChild>
-                  <Button variant="outline" type="button">
-                    Cancel
-                  </Button>
-                </AlertDialogCancel>
-                <Button type="submit">Submit</Button>
-              </div>
-            </form>
-          </Form>
-        </AlertDialogContent>
-      </AlertDialog>
+                                </DropdownMenuItem>
+                            ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="score"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Score</FormLabel>
+                        <FormControl>
+                        <Slider
+                            defaultValue={[field.value ?? 3]}
+                            min={1}
+                            max={5}
+                            step={1}
+                            onValueChange={(val: number[]) => field.onChange(val[0])}
+                        />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <div className="flex items-center justify-end space-x-4">
+                    <AlertDialogCancel asChild>
+                    <Button variant="outline" type="button">
+                        Cancel
+                    </Button>
+                    </AlertDialogCancel>
+                    <Button type="submit">Submit</Button>
+                </div>
+                </form>
+            </Form>
+            </AlertDialogContent>
+        </AlertDialog>
+        </div>
+
 
       {successMessage && (
         <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
@@ -352,77 +379,74 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
-        <Table className="border-collapse">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Date</TableHead>
-              <TableHead>Time of Day</TableHead>
-              <TableHead>Score</TableHead>
-              <TableHead className="w-[50px] text-center"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...poop]
-              .sort(
-                (a, b) =>
-                  new Date(b.poop_date).getTime() -
-                  new Date(a.poop_date).getTime()
-              )
-              .map((item) => (
-                <TableRow
-                  key={item["poop-id"]}
-                  onClick={() => setSelectedPoop(item)}
-                  className="cursor-pointer"
-                >
-                  <TableCell className="font-medium">
-                    {item.poop_date}
-                  </TableCell>
-                  <TableCell>{item.time_of_day}</TableCell>
-                  <TableCell>{item.score}</TableCell>
-                  <TableCell className="text-center">
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            onClick={(e) => e.stopPropagation()}
-                            className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          {errorMessage && (
-                            <div className="text-red-600 text-sm font-medium mb-2">
-                              {errorMessage}
-                            </div>
-                          )}
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. It will permanently
-                              delete this poop record.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() =>
-                                handleDelete(item["poop-id"])
-                              }
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
+        <div className="w-full max-w-6xl border-2 border-[var(--background)] rounded-lg">
+        <div className="max-h-[400px] overflow-y-auto">
+            <Table className="border-collapse w-full">
+            <TableHeader>
+                <TableRow>
+                <TableHead className="w-[100px] sticky top-0 z-10 bg-[var(--background)]">Date</TableHead>
+                <TableHead className="sticky top-0 z-10 bg-[var(--background)]">Time of Day</TableHead>
+                <TableHead className="sticky top-0 z-10 bg-[var(--background)]">Score</TableHead>
+                <TableHead className="w-[50px] text-center sticky top-0 z-10 bg-[var(--background)]"></TableHead>
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+                {[...poop]
+                .sort(
+                    (a, b) => new Date(b.poop_date).getTime() - new Date(a.poop_date).getTime()
+                )
+                .map((item) => (
+                    <TableRow
+                    key={item["poop-id"]}
+                    onClick={() => setSelectedPoop(item)}
+                    className="cursor-pointer"
+                    >
+                    <TableCell className="font-medium">{item.poop_date}</TableCell>
+                    <TableCell>{item.time_of_day}</TableCell>
+                    <TableCell>{item.score}</TableCell>
+                    <TableCell className="text-center">
+                        <div onClick={(e) => e.stopPropagation()}>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                            <Button
+                                onClick={(e) => e.stopPropagation()}
+                                className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                            {errorMessage && (
+                                <div className="text-red-600 text-sm font-medium mb-2">
+                                {errorMessage}
+                                </div>
+                            )}
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This action cannot be undone. It will permanently
+                                delete this poop record.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                onClick={() => handleDelete(item["poop-id"])}
+                                >
+                                Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        </div>
+                    </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+            </Table>
+        </div>
+        </div>
+
 
       {selectedPoop && (
         <AlertDialog
