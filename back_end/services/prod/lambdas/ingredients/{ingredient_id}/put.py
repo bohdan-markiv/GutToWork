@@ -1,7 +1,7 @@
 import boto3
 import json
 import logging
-from datetime import datetime
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -11,29 +11,38 @@ def handler(event, context):
     logger.info(f"Received event: {event}")
 
     try:
-        poop_id = event["pathParameters"]["poop_id"]
+        # Parse the registration ID from the path parameters
+        ingredient_id = event["pathParameters"]["ingredient_id"]
+
+        # Parse the request body (API Gateway sends it as a JSON string)
         body = json.loads(event["body"])
+        ingredient_name = body.get("ingredient_name")
+        ingredient_def_portion = body.get("default_portion_size")
+        ingredient_def_cook_type = body.get("default_cooking_type", None)
 
-        time_of_day = body["time_of_day"]
-        score = body["score"]
-        poop_date = body["poop_date"]
-
-        
         # Initialize DynamoDB client
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
         # Build the update expression dynamically
-        update_expression = "SET time_of_day = :n, score = :m, poop_date = :l"
+        update_expressions = [
+            "ingredient_name = :n",
+            "default_portion_size = :m"
+        ]
         expression_values = {
-            ":n": {'S': time_of_day},
-            ":m": {'N': str(score)},
-            ":l": {'S': poop_date}
+            ":n": {'S': ingredient_name},
+            ":m": {'S': ingredient_def_portion}
         }
+
+        if ingredient_def_cook_type is not None:
+            update_expressions.append("default_cooking_type = :l")
+            expression_values[":l"] = {'S': ingredient_def_cook_type}
+
+        update_expression = "SET " + ", ".join(update_expressions)
 
         # Perform the update
         response = dynamodb.update_item(
-            TableName='poop',
-            Key={'poop-id': {'S': poop_id}},
+            TableName='ingredients',
+            Key={'ingredients-id': {'S': ingredient_id}},
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_values,
             ReturnValues="UPDATED_NEW"
@@ -47,7 +56,7 @@ def handler(event, context):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps(response['Attributes'])  
+            'body': "Update was successful" + json.dumps(response['Attributes'])
         }
 
     except Exception as e:

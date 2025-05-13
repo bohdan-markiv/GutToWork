@@ -3,37 +3,38 @@ import json
 import logging
 from datetime import datetime
 
+# Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-
 def handler(event, context):
-    logger.info(f"Received event: {event}")
+    logger.info(f"Received event: {event}")  # Log the incoming request
 
     try:
-        poop_id = event["pathParameters"]["poop_id"]
+        # Extract path parameter (feeling ID) and request body
+        feeling_id = event["pathParameters"]["feeling_id"]
         body = json.loads(event["body"])
 
-        time_of_day = body["time_of_day"]
-        score = body["score"]
-        poop_date = body["poop_date"]
+        # Extract fields to update
+        feeling_score = body.get("feeling_score")
+        stress_level = body.get("stress_level")
+        feeling_date = body.get("feeling_date")
 
-        
         # Initialize DynamoDB client
         dynamodb = boto3.client('dynamodb', region_name='eu-central-1')
 
-        # Build the update expression dynamically
-        update_expression = "SET time_of_day = :n, score = :m, poop_date = :l"
+        # Prepare update expression and values
+        update_expression = "SET feeling_score = :m, stress_level = :s, feeling_date = :l"
         expression_values = {
-            ":n": {'S': time_of_day},
-            ":m": {'N': str(score)},
-            ":l": {'S': poop_date}
+            ":m": {'N': str(feeling_score)},
+            ":s": {'N': str(stress_level)},
+            ":l": {'S': feeling_date}
         }
 
-        # Perform the update
+        # Execute the update operation
         response = dynamodb.update_item(
-            TableName='poop',
-            Key={'poop-id': {'S': poop_id}},
+            TableName='feelings',
+            Key={'feeling-id': {'S': feeling_id}},
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_values,
             ReturnValues="UPDATED_NEW"
@@ -41,17 +42,19 @@ def handler(event, context):
 
         logger.info(f"Updated attributes: {response['Attributes']}")
 
+        # Return success message
         return {
             'statusCode': 200,
             'headers': {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps(response['Attributes'])  
+            'body': json.dumps(response['Attributes'])  # Returns updated fields only
         }
 
     except Exception as e:
         logger.error(f"Error updating item: {e}", exc_info=True)
+        # Return error message if update fails
         return {
             'statusCode': 500,
             'headers': {
