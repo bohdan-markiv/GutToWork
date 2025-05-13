@@ -7,7 +7,9 @@ export default function MainPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 text-blue-500"  style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}>
+
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white text-blue-500">
+
       <h1 className="text-4xl font-bold mb-4">Welcome to Gut to Work</h1>
       <p className="text-lg text-center max-w-2xl">
         This project is designed to help you analyze your diet and find out why
@@ -26,6 +28,7 @@ export default function MainPage() {
         >
           Ingredients
         </Button>
+
         <Button
           className="mt-4 hover:!bg-gray-500" // Use hover:!bg-gray-500 if you need to force the override
           onClick={() => router.push("/poop_table")}
@@ -44,6 +47,7 @@ export default function MainPage() {
         >
           Food
         </Button>
+
       </div>
     </div>
   );

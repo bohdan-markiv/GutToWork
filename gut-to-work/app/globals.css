@@ -15,11 +15,13 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: ##000B4B; /* Dark blue */
+    --background: #000B4B; /* Dark blue */
     --foreground: #ecf0f1; /* Light gray */
-    --primary: #1f8dd6; /* Brighter blue */
-    --secondary: #f48fb1; /* Soft pink */
-    --accent: #ffb3ab; /* Light coral */
+    --primary: #1CADE6; /* Soft blue */
+    --secondary: #DBDBDB; /* Light pink */
+    --accent: #DBDBDB; /* gray scale version of #f9c9ed pink from logo */
+    --border-radius: 0.5rem;
+    --transition: 0.3s ease;
   }
 }
 
