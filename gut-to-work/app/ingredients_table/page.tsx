@@ -93,6 +93,16 @@ export default function DashboardPage() {
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        ingredient_name: "",
+        default_cooking_type: "",
+        default_size: "",
+      });
+    }
+  }, [open, form]);
+
   // ----- Handle Form Submission -----
   const onSubmit = async (data: FormData) => {
     try {
@@ -183,12 +193,12 @@ export default function DashboardPage() {
     }
   };
 
-  return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-8"
-      style={{ backgroundColor: "white", color: "var(--primary)" }}
-    >
-      <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
+    return (
+        <div 
+        className="min-h-screen flex flex-col items-center justify-center p-8"
+        style={{ backgroundColor: "white", color: "var(--primary)" }}
+      >
+            <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 
       {/* ----- Display Success Message ----- */}
       {successMessage && (
