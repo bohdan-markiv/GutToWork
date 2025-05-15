@@ -58,7 +58,7 @@ import {
 import { Trash2 } from "lucide-react";
 
 const formSchema = z.object({
-  score: z.coerce.number().int().min(1).max(5),
+  score: z.coerce.number().int().min(1).max(10),
   poop_date: z.string().nonempty("Poop date is required"),
   time_of_day: z.string().nonempty("Time of day is required"),
 });
@@ -90,7 +90,7 @@ export default function DashboardPage() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      score: 3,
+      score: 5,
       poop_date: "",
       time_of_day: "",
     },
@@ -237,7 +237,7 @@ export default function DashboardPage() {
           <Slider
             defaultValue={[score]}
             min={1}
-            max={5}
+            max={10}
             step={1}
             onValueChange={(val: number[]) => setScore(val[0])}
           />
@@ -348,9 +348,9 @@ export default function DashboardPage() {
                         <FormLabel>Score</FormLabel>
                         <FormControl>
                         <Slider
-                            defaultValue={[field.value ?? 3]}
+                            defaultValue={[field.value ?? 5]}
                             min={1}
-                            max={5}
+                            max={10}
                             step={1}
                             onValueChange={(val: number[]) => field.onChange(val[0])}
                         />
