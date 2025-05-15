@@ -196,7 +196,7 @@ export default function DashboardPage() {
     return (
         <div 
         className="min-h-screen flex flex-col items-center justify-center p-8"
-        style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}
+        style={{ backgroundColor: "white", color: "var(--primary)" }}
       >
             <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
 

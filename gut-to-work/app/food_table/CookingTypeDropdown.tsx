@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "./DropdownMenu"; // Adjust path as needed
+} from "../components/DropdownMenu"; // Adjust path as needed
 
 const cookingOptions = [
   "raw",

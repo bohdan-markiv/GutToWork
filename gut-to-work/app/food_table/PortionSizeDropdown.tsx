@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from './DropdownMenu'; // Assuming these are correct imports
+} from '../components/DropdownMenu'; // Assuming these are correct imports
 
 const sizeOptions = ["small", "normal", "big"];
 

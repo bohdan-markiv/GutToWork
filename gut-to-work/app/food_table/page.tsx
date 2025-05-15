@@ -12,9 +12,9 @@ import { Button } from "../components/Button";
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "../components/Table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../components/Form";
 import { Input } from "../components/Input";
-import IngredientDropdown from "../components/IngredientDropdown";
-import CookingTypeDropdown from "../components/CookingTypeDropdown";
-import PortionSizeDropdown from "../components/PortionSizeDropdown";
+import IngredientDropdown from "./IngredientDropdown";
+import CookingTypeDropdown from "./CookingTypeDropdown";
+import PortionSizeDropdown from "./PortionSizeDropdown";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -84,21 +84,11 @@ export default function DashboardPage() {
     fetchIngredients();
   }, []);
 
-  useEffect(() => {
-  if (successMessage) {
-    console.log('Success message changed:', successMessage);
-  }
-}, [successMessage]);
-
   const handleDelete = async (id: string) => {
   try {
     const response = await axios.delete(
       `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records/${id}`
     );
-    console.log('Deletion response:', response); // Check the response
-
-    // Check if this line is being called
-    console.log('Setting success message');
 
     setFoodRecords((prev) => prev.filter((record) => record["food-record-id"] !== id));
     setSuccessMessage("Record successfully deleted!");
