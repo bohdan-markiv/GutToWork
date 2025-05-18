@@ -47,7 +47,12 @@ export default function MainPage() {
         >
           Food
         </Button>
-
+        <Button
+          className="mt-4 hover:!bg-gray-500" // Use hover:!bg-gray-500 if you need to force the override
+          onClick={() => router.push("/dashboard")}
+        >
+          Dashboard
+        </Button>
       </div>
     </div>
   );
