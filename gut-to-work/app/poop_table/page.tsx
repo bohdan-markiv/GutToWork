@@ -104,7 +104,7 @@ export default function DashboardPage() {
       );
       const newPoop: Poop = {
         ...data,
-        "poop-id": response.data,
+        "poop-id": response.data.poop_id,
       };
       setPoop((prev) => [...prev, newPoop]);
       form.reset();
@@ -304,7 +304,21 @@ export default function DashboardPage() {
                     <FormItem>
                         <FormLabel>Poop Date</FormLabel>
                         <FormControl>
-                        <Input type="date" {...field} />
+                          <input
+                            type="date"
+                            {...field}
+                            max={new Date().toISOString().split("T")[0]} // ← blocks future dates
+                            ref={(el) => {
+                              field.ref(el);
+                              if (el) {
+                                el.addEventListener("focus", () => {
+                                  // @ts-ignore
+                                  el.showPicker?.(); // Opens calendar on click/focus
+                                });
+                              }
+                            }}
+                            className="w-full px-3 py-2 border rounded-md cursor-pointer"
+                          />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
