@@ -111,9 +111,9 @@ const formSchema = z.object({
     const form = useForm<FormData>({ //"This form will use the type FormData" This helps TypeScript know exactly what fields the form expects.
         resolver: zodResolver(formSchema),
         defaultValues: {
-            feeling_score: undefined,
-            stress_level: undefined, //undefined means the number fields will be empty by default (useful for sliders or number inputs).
-            feeling_date: "",
+            feeling_score: 5,
+            stress_level: 5, //undefined means the number fields will be empty by default (useful for sliders or number inputs).
+            feeling_date: new Date().toISOString().split("T")[0],
         },
     });
 
@@ -135,7 +135,7 @@ const formSchema = z.object({
                 feeling_score: data.feeling_score,
                 stress_level: data.stress_level,
                 feeling_date: data.feeling_date,
-                "feeling-id": response.data,
+                "feeling-id": response.data.feeling_id,
             };
   
             setFeelings((prev) => [...prev, newFeeling]);
@@ -258,7 +258,7 @@ return (
                                 <FormLabel>Feeling Score (1–10)</FormLabel>
                                 <FormControl>
                                     <Slider
-                                    defaultValue={[field.value ?? 5]}
+                                    value={[field.value]}
                                     min={1}
                                     max={10}
                                     step={1}
