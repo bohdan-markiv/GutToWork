@@ -338,14 +338,14 @@ return (
             </div>
 
             {/* Actual table container */}
-            <div className="overflow-auto border-2 border-[var(--background)] rounded-lg">
-                <Table className="border-collapse">
+            <div className="max-h-[400px] overflow-y-auto border-2 border-[var(--background)] rounded-lg">
+                <Table className="border-collapse w-full">
                 <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-center">Feeling Score</TableHead>
-                            <TableHead className="text-center">Stress Level</TableHead>
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Delete button */}
+                            <TableHead className="sticky top-0 z-10 bg-white">Date</TableHead>
+                            <TableHead className="text-center sticky top-0 z-10 bg-white">Feeling Score</TableHead>
+                            <TableHead className="text-center sticky top-0 z-10 bg-white">Stress Level</TableHead>
+                            <TableHead className="w-[50px] text-center sticky top-0 z-10 bg-white"></TableHead>
                         </TableRow>
                      </TableHeader>
                      <TableBody>
