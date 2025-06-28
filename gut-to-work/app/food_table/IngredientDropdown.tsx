@@ -1,23 +1,23 @@
 // IngredientDropdown.tsx
-import { Controller } from "react-hook-form";
+import { Control, FieldValues, Controller, Path } from "react-hook-form";
 import { Ingredient } from "../types";
 import { useState } from "react";
 
-interface IngredientDropdownProps {
-  control: any;
-  name: string;
+interface IngredientDropdownProps<T extends FieldValues> {
+  control: Control<T>;
+  name:  Path<T>;
   label?: string;
   ingredients: Ingredient[];
   onAddIngredient?: (id: string) => void;
 }
 
-const IngredientDropdown = ({
+const IngredientDropdown = <T extends FieldValues> ({
   control,
   name,
   label,
   ingredients,
   onAddIngredient,
-}: IngredientDropdownProps) => {
+}:  IngredientDropdownProps<T>) => {
   const [inputValue, setInputValue] = useState("");
 
   const getIngredientById = (id: string) =>

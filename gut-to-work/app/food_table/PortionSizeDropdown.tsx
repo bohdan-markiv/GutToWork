@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form'; // Import useFormContext for form control
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '../components/DropdownMenu'; // Assuming these are correct imports
+} from '../components/DropdownMenu';
+import { ControllerRenderProps, FieldValues, Path } from 'react-hook-form';
 
 const sizeOptions = ["small", "normal", "big"];
 
-const PortionSizeDropdown = ({
+type PortionSizeDropdownProps<T extends FieldValues, K extends Path<T>> = {
+  field: ControllerRenderProps<T, K>;
+  defaultValue: string;
+};
+
+const PortionSizeDropdown = <T extends FieldValues, K extends Path<T>>({
   field,
   defaultValue,
-}: {
-  field: any;  // Field from React Hook Form
-  defaultValue: string;
-}) => {
-  const [selectedType, setSelectedType] = useState<string>(defaultValue || ""); 
+}: PortionSizeDropdownProps<T, K>) => {
+  const [selectedType, setSelectedType] = useState<string>(defaultValue || "");
 
-  // Sync internal state with field value from React Hook Form
   useEffect(() => {
-    // Only update internal state if the field value changes
     if (field.value !== selectedType) {
       setSelectedType(field.value || defaultValue || "");
     }
@@ -29,7 +29,7 @@ const PortionSizeDropdown = ({
 
   const handleSelection = (type: string) => {
     setSelectedType(type);
-    field.onChange(type); // Update React Hook Form state manually
+    field.onChange(type);
   };
 
   return (
@@ -56,4 +56,3 @@ const PortionSizeDropdown = ({
 };
 
 export default PortionSizeDropdown;
-

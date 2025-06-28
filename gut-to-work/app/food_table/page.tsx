@@ -17,7 +17,6 @@ import CookingTypeDropdown from "./CookingTypeDropdown";
 import PortionSizeDropdown from "./PortionSizeDropdown";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogCancel,
   AlertDialogFooter,
@@ -35,6 +34,8 @@ import {
   DropdownMenuTrigger,
 } from "../components/DropdownMenu";
 
+import { FoodRecord, FoodRecordIngredient, Ingredient } from "../types";
+
 const formSchema = z.object({
   date: z.string({ required_error: "Date is required" }),
   time_of_day: z.string({ required_error: "Time of day is required" }),
@@ -49,12 +50,12 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function DashboardPage() {
-  const [ingredients, setIngredients] = useState<any[]>([]);
-  const [foodRecords, setFoodRecords] = useState<any[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [foodRecords, setFoodRecords] = useState<FoodRecord[]>([]);
   const [open, setOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<any | null>(null);
+  const [editingRecord, setEditingRecord] = useState<FoodRecord | null>(null);
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [recordToDelete, setRecordToDelete] = useState<any | null>(null);
+  const [recordToDelete, setRecordToDelete] = useState<FoodRecord | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter()
@@ -86,7 +87,7 @@ export default function DashboardPage() {
 
   const handleDelete = async (id: string) => {
   try {
-    const response = await axios.delete(
+    await axios.delete(
       `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records/${id}`
     );
 
@@ -109,8 +110,8 @@ export default function DashboardPage() {
   }
 };
 
-
 const onEditSubmit = async (data: FormData) => {
+  if (editingRecord) {
   try {
     const payload = {
       food_record_id: editingRecord["food-record-id"],
@@ -173,7 +174,7 @@ const onEditSubmit = async (data: FormData) => {
       setErrorMessage(null);
     }, 3000);
   }
-};
+}};
 
 
   useEffect(() => {
@@ -182,7 +183,7 @@ const onEditSubmit = async (data: FormData) => {
         const response = await axios.get(
           "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/food_records"
         );
-        const formattedRecords = response.data.map((record: any) => ({
+        const formattedRecords = response.data.map((record: FoodRecord) => ({
           ...record,
           ingredients: JSON.parse(record.ingredients_json),
         }));
@@ -268,6 +269,7 @@ const onEditSubmit = async (data: FormData) => {
         </div>
       )}
 
+
       <div className="w-full max-w-6xl mb-4 flex justify-between">
   <Button
     onClick={() => {
@@ -322,8 +324,8 @@ const onEditSubmit = async (data: FormData) => {
                 setEditingRecord(record);
                 form.setValue("date", record.record_date);
                 form.setValue("time_of_day", record.time_of_day);
-                form.setValue("ingredients", record.ingredients.map((i: any) => i.ingredient_id));
-                record.ingredients.forEach((ing: any) => {
+                form.setValue("ingredients", record.ingredients.map((i: FoodRecordIngredient) => i.ingredient_id));
+                record.ingredients.forEach((ing: FoodRecordIngredient) => {
                   form.setValue(`ingredients_info.${ing.ingredient_id}.cookingType`, ing.cooking_type);
                   form.setValue(`ingredients_info.${ing.ingredient_id}.portionSize`, ing.portion_size);
                 });
@@ -334,7 +336,7 @@ const onEditSubmit = async (data: FormData) => {
               <TableCell>{record.time_of_day}</TableCell>
               <TableCell>
                 <ul className="list-disc pl-4">
-                  {record.ingredients?.map((ing: any, idx: number) => (
+                  {record.ingredients?.map((ing: FoodRecordIngredient, idx: number) => (
                     <li key={idx}>
                       {ing.ingredient_name} ({ing.cooking_type || "N/A"} {ing.portion_size || "N/A"})
                     </li>
@@ -342,6 +344,11 @@ const onEditSubmit = async (data: FormData) => {
                 </ul>
               </TableCell>
               <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                {errorMessage && (
+        <div className="text-red-600 text-sm font-medium mb-2">
+          {errorMessage}
+        </div>
+      )}
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();

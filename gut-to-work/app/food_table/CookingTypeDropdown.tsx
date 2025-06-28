@@ -16,17 +16,21 @@ const cookingOptions = [
   "infused",
 ];
 
+interface CookingTypeDropdownProps {
+  field: {
+    value: string;
+    onChange: (value: string) => void;
+  };
+  defaultValue: string;
+}
+
 const CookingTypeDropdown = ({
   field,
   defaultValue,
-}: {
-  field: any;
-  defaultValue: string;
-}) => {
+}: CookingTypeDropdownProps) => {
   const [selectedType, setSelectedType] = useState<string>(field.value || defaultValue || "");
 
   useEffect(() => {
-    // If the form's value changes externally, update selectedType
     if (field.value !== selectedType) {
       setSelectedType(field.value || defaultValue || "");
     }
@@ -34,7 +38,7 @@ const CookingTypeDropdown = ({
 
   const handleSelection = (type: string) => {
     setSelectedType(type);
-    field.onChange(type); // update form state
+    field.onChange(type);
   };
 
   return (
