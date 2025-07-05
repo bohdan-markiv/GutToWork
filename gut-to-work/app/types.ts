@@ -8,6 +8,13 @@ export type Ingredient = {
 
 export type Ingredients = Ingredient[]; 
 
+
+export type Poop = {
+  "poop-id": string;
+  score: number;
+  time_of_day: string;
+  poop_date: string;
+
 export type EditFormProps = {
     ingredient: Ingredient;
     onSubmit: (updatedIngredient: Ingredient) => void;
