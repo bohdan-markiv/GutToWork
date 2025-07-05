@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -11,15 +11,15 @@ import { useRouter } from "next/navigation";
 import { Trash2, Home } from "lucide-react";
 
 import { Button } from "../components/Button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { // This can be seen in ui.shadcn.com as seen in this link https://ui.shadcn.com/docs/components/table
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "../components/Table";
-import { Ingredient, Ingredients } from "../types";
+import { Ingredient } from "../types";  // Defined in Types.ts
 
 import {
   Form,
@@ -53,14 +53,14 @@ import {
 
 import { EditForm } from "../components/EditForm";
 
-// ----- Zod Schema for Ingredient Form -----
+// ----- Zod Schema for Ingredient Form -----  "Look at the schema I made and generate a TypeScript type that matches it."
 const formSchema = z.object({
-  ingredient_name: z.string().nonempty("Ingredient name is required"),
-  default_cooking_type: z.string().nonempty("Default cooking type is required"),
-  default_size: z.string().nonempty("Default size is required"),
+    ingredient_name: z.string().nonempty("Ingredient name is required"), //ingredient_name: must be a string, and it cannot be empty. If it is empty, show the error message: "Ingredient name is required".
+    default_cooking_type: z.string().nonempty("Default cooking type is required"),
+    default_size: z.string().nonempty("Default size is required"),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>; // typeof formSchema tells it: "Use the shape of the formSchema I just wrote."
 
 export default function DashboardPage() {
   const [ingredients, setIngredients] = useState<Ingredients>([]);
@@ -71,20 +71,20 @@ export default function DashboardPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
-  // ----- Fetch Ingredients -----
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients"
-        );
-        setIngredients(response.data);
-      } catch (error) {
-        console.error("Failed to fetch ingredients", error);
-      }
-    };
-    fetchData();
-  }, []);
+    // ----- Fetch Ingredients ----- 
+    useEffect(() => {  // This is how we do the connection to AWS (the backend) 
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(
+                    "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients" // Take data from the table ingredients
+                );
+                setIngredients(response.data);
+            } catch (error) {
+                console.error("Failed to fetch ingredients", error);
+            }
+        };
+        fetchData();
+    }, []);
 
   // ----- React Hook Form Setup for Creating Ingredient -----
   const form = useForm<FormData>({
@@ -106,95 +106,107 @@ export default function DashboardPage() {
     }
   }, [open, form]);
 
-  // ----- Handle Form Submission -----
-  const onSubmit = async (data: FormData) => {
-    try {
-      const response = await axios.post(
-        "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients",
-        {
-          ingredient_name: data.ingredient_name,
-          default_cooking_type: data.default_cooking_type,
-          default_portion_size: data.default_size,
+    // ----- Handle Form Submission -----  User submits the form → This onSubmit function gets triggered.
+    const onSubmit = async (data: FormData) => {
+        try {
+            const response = await axios.post( //You send a POST request (axios.post) to your AWS API to create a new ingredient.
+                "https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients",
+                {
+                    ingredient_name: data.ingredient_name,
+                    default_cooking_type: data.default_cooking_type,
+                    default_portion_size: data.default_size,
+                } // (based on what the user typed in the form — data comes from the form.)
+            );
+            const newIngredient: Ingredient = {
+                ingredient_name: data.ingredient_name,
+                default_cooking_type: data.default_cooking_type,
+                "ingredients-id": response.data,
+                default_portion_size: data.default_size,
+            };
+            setIngredients((prev) => [...prev, newIngredient]); //Take previous plus new ingredient. Adds the new ingredient to your ingredients list immediately on the page.
+            form.reset(); // Clear the form
+            setOpen(false); // Close the dialog
+            setSuccessMessage("Ingredient successfully created!");
+            setErrorMessage(null) // Set the success message
+            setTimeout(() => {
+                setSuccessMessage(null); // Hide the message after 3 seconds
+            }, 3000);
+        } catch (error) {
+            console.error("Failed to create ingredient", error);
+            setErrorMessage("Failed to create ingredient. Please try again."); // Set the error message
+            setSuccessMessage(null);
+            setTimeout(() => {
+                setErrorMessage(null);
+            }, 3000);
         }
-      );
-      const newIngredient: Ingredient = {
-        ingredient_name: data.ingredient_name,
-        default_cooking_type: data.default_cooking_type,
-        "ingredients-id": response.data,
-        default_portion_size: data.default_size,
-      };
-      setIngredients((prev) => [...prev, newIngredient]);
-      form.reset(); // Clear the form
-      setOpen(false); // Close the dialog
-      setSuccessMessage("Ingredient successfully created!");
-      setErrorMessage(null); // Set the success message
-      setTimeout(() => {
-        setSuccessMessage(null); // Hide the message after 3 seconds
-      }, 3000);
-    } catch (error) {
-      console.error("Failed to create ingredient", error);
-      setErrorMessage("Failed to create ingredient. Please try again."); // Set the error message
-      setSuccessMessage(null);
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 3000);
-    }
-  };
+    };
 
-  // ----- Handle Ingredient Deletion -----
-  const handleDelete = async (id: string) => {
-    try {
-      await axios.delete(
-        `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${id}`
-      );
-      setIngredients((prev) =>
-        prev.filter((item) => item["ingredients-id"] !== id)
-      );
-      setSuccessMessage("Ingredient successfully deleted!");
-      setErrorMessage(null); // Set the success message
-      setTimeout(() => {
-        setSuccessMessage(null); // Hide the message after 3 seconds
-      }, 3000);
-    } catch (error) {
-      console.error("Failed to delete ingredient", error);
-      setErrorMessage("Failed to delete ingredient. Please try again."); // Set the error message
-      setSuccessMessage(null);
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 3000);
-    }
-  };
+    // ----- Handle Ingredient Deletion ----- 
+    const handleDelete = async (id: string) => {
+        try {
+            await axios.delete(
+                `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${id}`
+            );
+            setIngredients((prev) => prev.filter((item) => item["ingredients-id"] !== id)); //This button part is here cause If not it wouldnt update in our visual only in aws. 
+            setSuccessMessage("Ingredient successfully deleted!");
+            setErrorMessage(null) // Set the success message
+            setTimeout(() => {
+                setSuccessMessage(null); // Hide the message after 3 seconds
+            }, 3000);
+        } catch (error) {
+            console.error("Failed to delete ingredient", error);
+            setErrorMessage("Failed to delete ingredient. Please try again."); // Set the error message
+            setSuccessMessage(null);
+            setTimeout(() => { // Timeout is so that message dissapears. 
+                setErrorMessage(null);
+            }, 3000);
+        }
+    };
 
   // ----- Handle Ingredient Edit -----
 
-  const handleEditSubmit = async (updatedIngredient: Ingredient) => {
-    try {
-      await axios.put(
-        `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${updatedIngredient["ingredients-id"]}`,
-        updatedIngredient
-      );
-      setIngredients((prev) =>
-        prev.map((item) =>
-          item["ingredients-id"] === updatedIngredient["ingredients-id"]
-            ? updatedIngredient
-            : item
-        )
-      );
-      setSuccessMessage("Ingredient updated successfully!");
-      setErrorMessage(null); // Reset error message on success
-      setTimeout(() => {
-        setSuccessMessage(null); // Hide the success message after 3 seconds
-      }, 3000);
-      setSelectedIngredient(null); // Close the dialog
-    } catch (error) {
-      console.error("Failed to update ingredient", error);
-      setErrorMessage("Failed to update ingredient. Please try again.");
-      setSuccessMessage(null); // Reset success message on error
-      setTimeout(() => {
-        setErrorMessage(null); // Hide the error message after 3 seconds
-      }, 3000);
-    }
-  };
+    const handleEditSubmit = async (updatedIngredient: Ingredient) => {
+        try {
+            await axios.put(
+                `https://mrmevidrmf.execute-api.eu-central-1.amazonaws.com/prod/ingredients/${updatedIngredient["ingredients-id"]}`,
+                updatedIngredient
+            );
+            setIngredients((prev) =>
+                prev.map((item) =>
+                    item["ingredients-id"] === updatedIngredient["ingredients-id"]
+                        ? updatedIngredient
+                        : item
+                )
+            );
+            setSuccessMessage("Ingredient updated successfully!");
+            setErrorMessage(null); // Reset error message on success
+            setTimeout(() => {
+                setSuccessMessage(null); // Hide the success message after 3 seconds
+            }, 3000);
+            setSelectedIngredient(null); // Close the dialog
+        } catch (error) {
+            console.error("Failed to update ingredient", error);
+            setErrorMessage("Failed to update ingredient. Please try again.");
+            setSuccessMessage(null); // Reset success message on error
+            setTimeout(() => {
+                setErrorMessage(null); // Hide the error message after 3 seconds
+            }, 3000);
+        }
+    };
+
+
+
+
+
+
+
+/////////////////// RETURN STATEMENT GIVES VISUAL COMPONENT OF THE PAGE /////////////
+///////////////////THIS IS THE START OF THE UI YOUR PAGE WILL DISPLAY////////////////////////
+//////Everything inside the Div will be shown on the screen ///////
+
+
+
+
 
   return (
     <div
@@ -315,12 +327,13 @@ export default function DashboardPage() {
 </div>
 </div>
 
-      {/* ----- Display Success Message ----- */}
-      {successMessage && (
-        <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md">
-          <strong>{successMessage}</strong>
-        </div>
-      )}
+            {/* ----- Display Success Message ----- */}
+            {successMessage && (
+                <div className="mb-4 p-4 bg-green-500 text-white rounded-lg shadow-md"> 
+                    {/* Defined outisde to be Table to put it on top*/}
+                    <strong>{successMessage}</strong>
+                </div>
+            )}
 
       {/* ----- Ingredients Table ----- */}
       <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
