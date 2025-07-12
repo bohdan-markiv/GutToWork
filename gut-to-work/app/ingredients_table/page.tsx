@@ -6,7 +6,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";      
+
+import { Trash2, Home } from "lucide-react";
 
 import { Button } from "../components/Button";
 import { // This can be seen in ui.shadcn.com as seen in this link https://ui.shadcn.com/docs/components/table
@@ -60,12 +62,14 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>; // typeof formSchema tells it: "Use the shape of the formSchema I just wrote."
 
-export default function DashboardPage() {  // Creating a page component. This defines the things that are on the Page. Prepares all things you need to store ing, select ingredients, open/close modals and show success error messages inside the page.
-    const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-    const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
-    const [open, setOpen] = useState(false);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+export default function DashboardPage() {
+  const [ingredients, setIngredients] = useState<Ingredients>([]);
+  const [selectedIngredient, setSelectedIngredient] =
+    useState<Ingredient | null>(null);
+  const [open, setOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
     // ----- Fetch Ingredients ----- 
     useEffect(() => {  // This is how we do the connection to AWS (the backend) 
@@ -82,16 +86,25 @@ export default function DashboardPage() {  // Creating a page component. This de
         fetchData();
     }, []);
 
-    // ----- React Hook Form Setup for Creating Ingredient ----- // Also quite Important
-    //You are creating a form instance using React Hook Form.
-    const form = useForm<FormData>({ //"This form will use the type FormData" This helps TypeScript know exactly what fields the form expects.
-        resolver: zodResolver(formSchema), //You connect Zod validation to the form.
-        defaultValues: {
-            ingredient_name: "",
-            default_cooking_type: "", //This means the Form which is in the dialog box is empty by default. ie: when we want to add a new ingredient. 
-            default_size: "",
-        },
-    });
+  // ----- React Hook Form Setup for Creating Ingredient -----
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      ingredient_name: "",
+      default_cooking_type: "",
+      default_size: "",
+    },
+  });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        ingredient_name: "",
+        default_cooking_type: "",
+        default_size: "",
+      });
+    }
+  }, [open, form]);
 
     // ----- Handle Form Submission -----  User submits the form → This onSubmit function gets triggered.
     const onSubmit = async (data: FormData) => {
@@ -198,9 +211,121 @@ export default function DashboardPage() {  // Creating a page component. This de
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center p-8"
-      style={{ backgroundColor: "white", color: "var(--primary)" }}
+      style={{ backgroundColor: 'var(--surface)', color: 'var(--primary)' }}
     >
       <h1 className="text-4xl font-bold mb-4">Ingredients</h1>
+
+      <div className="w-full max-w-6xl mb-4 flex justify-between">
+  <Button
+    onClick={() => {
+      router.push("/welcome_page");
+    }}
+    className="hover:!bg-gray-500"
+  >
+    <Home className="w-4 h-4" />
+  </Button>
+
+<div className="absolute left-1/2 transform -translate-x-1/2">
+  <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialogTrigger asChild>
+      <Button className="hover:!bg-gray-500">Create Ingredient</Button>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+      <AlertDialogTitle>Create ingredient</AlertDialogTitle>
+      {errorMessage && (
+        <div className="text-red-600 text-sm font-medium mb-2">
+          {errorMessage}
+        </div>
+      )}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Ingredient Name */}
+          <FormField
+            control={form.control}
+            name="ingredient_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ingredient Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Potato" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Cooking Type */}
+          <FormField
+            control={form.control}
+            name="default_cooking_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Cooking Type</FormLabel>
+                <FormControl>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                        {field.value || "Select Cooking Type"}
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuSeparator />
+                      {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
+                        <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                          {type}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Default Size */}
+          <FormField
+            control={form.control}
+            name="default_size"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Size</FormLabel>
+                <FormControl>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
+                        {field.value || "Select Portion Size"}
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuSeparator />
+                      {["small", "normal", "big"].map((type) => (
+                        <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
+                          {type}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-center justify-end space-x-4">
+            <AlertDialogCancel asChild>
+              <Button variant="outline" type="button">
+                Cancel
+              </Button>
+            </AlertDialogCancel>
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+      </Form>
+    </AlertDialogContent>
+  </AlertDialog>
+</div>
+</div>
 
             {/* ----- Display Success Message ----- */}
             {successMessage && (
@@ -210,177 +335,98 @@ export default function DashboardPage() {  // Creating a page component. This de
                 </div>
             )}
 
-            {/*After your title and success message, you now display a big ingredients table.*/}
-            {/* ----- Ingredients Table ----- */} 
-            <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
-                <Table className="border-collapse">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Name</TableHead>
-                            <TableHead>Default Cooking style</TableHead>
-                            <TableHead>Default Size</TableHead>
-                            <TableHead className="w-[50px] text-center"></TableHead> {/* Header row with column titles: Name, Cooking style, Size, and an empty one (for the delete button). */}
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody> {/* Every other row is defined here */}
-                        {/* Specifies that everthing thats gonna be in this table is gonna be a separate ingredient. */}
-                        {ingredients.map((ingredient) => (  
-                            
-                            <TableRow 
-                                key={ingredient["ingredients-id"]}  //Saves eveyhting from that ingredient. If click here can see it in dialog box 
-                                onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
-                                className="cursor-pointer"
-                            >
-                                <TableCell className="font-medium">{ingredient.ingredient_name}</TableCell> {/* Show the ingedient data */}
-                                <TableCell>{ingredient.default_cooking_type}</TableCell>
-                                <TableCell>{ingredient.default_portion_size}</TableCell>
-                                <TableCell className="text-center">
-                                    <div onClick={(e) => e.stopPropagation()}> {/* This stops the click from also selecting the row when you click the delete button. */}
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button // Define button as triger
-                                                onClick={(e) => e.stopPropagation()} 
-                                                className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2">
-                                                    {/* Trash icon inside the button */}
-                                                    <Trash2 className="w-4 h-4" /> {/* visual element (trash can) */}
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent> 
-                                                {errorMessage && ( // Conditional module, when error message is true
-                                                    <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div> )}
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle> 
-                                                    <AlertDialogDescription>
-                                                        This action cannot be undone. It will permanently delete this ingredient.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDelete(ingredient["ingredients-id"])}>Delete</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {/* Create Edit Form */}
-            {selectedIngredient && (
-                <AlertDialog open={!!selectedIngredient} onOpenChange={() => setSelectedIngredient(null)}>
-                    <AlertDialogContent className="max-w-lg">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Edit Ingredient</AlertDialogTitle>
-                        </AlertDialogHeader>
-                        <EditForm
-                            ingredient={selectedIngredient}
-                            onSubmit={handleEditSubmit}
-                            onCancel={() => setSelectedIngredient(null)} // Close the dialog
-                            successMessage={successMessage}
-                            errorMessage={errorMessage}
-                        />
-                    </AlertDialogContent>
-                </AlertDialog>
-            )}
-
-
-            {/* ----- Create Ingredient Form via AlertDialog ----- */}
-            <AlertDialog open={open} onOpenChange={setOpen}>
-                <AlertDialogTrigger asChild>
-                    <Button className="mt-4 hover:!bg-gray-500">Create Ingredient</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogTitle>
-                        Create ingredient
-                    </AlertDialogTitle>
-                    {errorMessage && (
-                        <div className="text-red-600 text-sm font-medium mb-2">{errorMessage}</div>
-                    )}
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            {/* Ingredient Name - How it should look */}
-                            <FormField control={form.control} name="ingredient_name" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Ingredient Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g., Potato" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            {/* Cooking Type - A bit more complex since we have a dropdown*/}
-                            <FormField control={form.control} name="default_cooking_type" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Default Cooking Type</FormLabel>
-                                    <FormControl>
-                                        <DropdownMenu> {/* One of the Components we have */}
-                                            <DropdownMenuTrigger asChild> 
-                                                <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                                                    {field.value || "Select Cooking Type"}
-                                                </div>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                <DropdownMenuSeparator />
-                                                {["raw", "boiled", "deep fried", "pan fried", "baked", "infused"].map((type) => (
-                                                    <DropdownMenuItem key={type} onSelect={() => field.onChange(type)}>
-                                                        {type}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-              {/* Default Size */}
-              <FormField
-                control={form.control}
-                name="default_size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Default Size</FormLabel>
-                    <FormControl>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <div className="w-full px-3 py-2 border border-[var(--accent)] rounded-md cursor-pointer bg-background focus:outline-none focus:ring-2 focus:ring-ring shadow-sm">
-                            {field.value || "Select Portion Size"}
+      {/* ----- Ingredients Table ----- */}
+      <div className="w-full max-w-6xl overflow-auto border-2 border-[var(--background)] rounded-lg">
+        <div className="relative max-h-[400px] overflow-y-auto">
+        <Table className="border-collapse">
+          <TableHeader className="sticky top-0 bg-white z-10">
+            <TableRow>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead>Default Cooking style</TableHead>
+              <TableHead>Default Size</TableHead>
+              <TableHead className="w-[50px] text-center"></TableHead>{" "}
+              {/* Delete */}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ingredients.map((ingredient) => (
+              <TableRow
+                key={ingredient["ingredients-id"]}
+                onClick={() => setSelectedIngredient(ingredient)} // Trigger edit on row click
+                className="cursor-pointer"
+              >
+                <TableCell className="font-medium">
+                  {ingredient.ingredient_name}
+                </TableCell>
+                <TableCell>{ingredient.default_cooking_type}</TableCell>
+                <TableCell>{ingredient.default_portion_size}</TableCell>
+                <TableCell className="text-center">
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-4 hover:bg-gray-500 inline-flex items-center justify-center gap-2 p-2"
+                        >
+                          {/* Trash icon inside the button */}
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        {errorMessage && (
+                          <div className="text-red-600 text-sm font-medium mb-2">
+                            {errorMessage}
                           </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuSeparator />
-                          {["small", "normal", "big"].map((type) => (
-                            <DropdownMenuItem
-                              key={type}
-                              onSelect={() => field.onChange(type)}
-                            >
-                              {type}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        )}
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. It will permanently
+                            delete this ingredient.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() =>
+                              handleDelete(ingredient["ingredients-id"])
+                            }
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        </div>
+      </div>
 
-              <div className="flex items-center justify-end space-x-4">
-                <AlertDialogCancel asChild>
-                  <Button variant="outline" type="button">
-                    Cancel
-                  </Button>
-                </AlertDialogCancel>
-                <Button type="submit">Submit</Button>
-              </div>
-            </form>
-          </Form>
-        </AlertDialogContent>
-      </AlertDialog>
+      {selectedIngredient && (
+        <AlertDialog
+          open={!!selectedIngredient}
+          onOpenChange={() => setSelectedIngredient(null)}
+        >
+          <AlertDialogContent className="max-w-lg">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Edit Ingredient</AlertDialogTitle>
+            </AlertDialogHeader>
+            <EditForm
+              ingredient={selectedIngredient}
+              onSubmit={handleEditSubmit}
+              onCancel={() => setSelectedIngredient(null)} // Close the dialog
+              successMessage={successMessage}
+              errorMessage={errorMessage}
+            />
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      
     </div>
   );
 }
